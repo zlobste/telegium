@@ -5,17 +5,26 @@ const schema = new Schema({
         type: Number,
         required: true
     },
-    balance: {
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    rating: {
         type: Number,
         default: 0,
         required: true
     },
-    role: {
-        type: String,
-        default: 'user',
+    autoposting: {
+        type: Boolean,
+        default: false,
         required: true
     }
 });
 
 
-module.exports = model('User', schema);
+module.exports = model('Channel', schema);
+
+
+
+
