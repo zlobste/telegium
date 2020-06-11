@@ -11,6 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^8.2.0"
+    "@mtproto/core": "^3.2.0",
+    "dotenv": "^8.2.0",
+    "mongoose": "^5.9.18",
+    "telegraf": "^3.38.0"
   }
 }
