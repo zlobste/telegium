@@ -16,9 +16,14 @@ const schema = new Schema({
         type: Date,
         required: true
     },
-    posts: {
-        type: [Schema.Types.ObjectId],
+    post: {
+        type: Schema.Types.ObjectId,
         ref: 'Post',
+        required: true
+    },
+    inBasket:{
+        type: Boolean,
+        default: false,
         required: true
     }
 });

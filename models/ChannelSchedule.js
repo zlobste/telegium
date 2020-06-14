@@ -27,6 +27,11 @@ const schema = new Schema({
         type: Boolean,
         default: true,
         required: true
+    },
+    timeOfActivePost: {
+        type: Date,
+        //default: 1,
+        required: true
     }
 });
 
