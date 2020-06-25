@@ -1,7 +1,11 @@
-const { Telegraf, Markup, Extra } = require('telegraf')
 require('dotenv').config()
 const mongoose = require('mongoose')
-const User = require('./models/User');
+const session = require("telegraf/session");
+const {Telegraf} = require('telegraf')
+const Stage = require("telegraf/stage");
+const main = require('./src/scenes/main')
+const userPosts = require('./src/scenes/userPosts')
+const addPost = require('./src/scenes/addPost')
 
 
 
@@ -14,71 +18,68 @@ async function start() {
             useCreateIndex: true
         })
 
+
+        /*const userPosts = new WizardScene(
+            "userPosts", // Имя сцены
+            (ctx) => {
+                const object = `{ id: '444432244343' }`
+                console.log(object)
+                ctx.reply('All your posts',
+                    Extra.HTML().markup((m) => m.inlineKeyboard([
+
+                        [
+                            m.callbackButton('Add post', 'Add post'),
+                            m.callbackButton('Back', 'Back')
+                        ],
+                        [
+                            m.callbackButton('post1', object),
+                        ],
+                        [
+                            m.callbackButton('post2', 'post2'),
+
+                        ],
+                        [
+                            m.callbackButton('Next', 'Next'),
+                            m.callbackButton('Previous', 'Previous'),
+                        ]
+                    ])))
+
+                return ctx.wizard.next(); // Переходим к следующему обработчику.
+            },
+        )
+
+       userPosts.on('callback_query', (ctx) => {
+           console.log(ctx)
+           //return ctx.wizard.next()
+        })*/
+
+
+
+        const stage = new Stage()
+
+
         const bot = new Telegraf(process.env.BOT_TOKEN)
+        bot.use(session())
+        bot.use(stage.middleware())
+
+        stage.register(main)
+        stage.register(userPosts)
+        stage.register(addPost)
+
+
+        bot.catch((err, ctx) => {
+            console.log(`Ooops, encountered an error for ${ctx.updateType}`, err)
+        })
 
         bot.start(async (ctx) => {
-
-            const candidate = await User.findOne({
-                telegramId: ctx.update.message.from.id
-            })
-
-            if (!candidate) {
-                const newUser = new User({
-                    telegramId: ctx.update.message.from.id
-                });
-                await newUser.save()
-            }
-
-
-            return ctx.reply('User info and statistics',
-                Extra.HTML().markup((m) => m.inlineKeyboard([
-
-                    [
-                        m.callbackButton('All channels', 'All channels')
-                    ],
-                    [
-                        m.callbackButton('User posts', 'User posts'),
-                        m.callbackButton('User channels', 'User channels')
-                    ],
-                    [
-                        m.callbackButton('Notifications', 'Notifications'),
-                        m.callbackButton('Basket', 'Basket'),
-                    ],
-                    [
-                        m.callbackButton('Put money', 'Put money'),
-                        m.callbackButton('Get money', 'Get money'),
-                    ]
-                ])))
-
-
+            await ctx.scene.enter("main")
         })
 
-        bot.action('All channels', async (ctx, next) => {
-            await ctx.answerCbQuery()
-            return ctx.reply('👍').then(() => next())
-        })
-
-
-
-
-
-        bot.help((ctx) => ctx.reply('Send me a sticker'))
-
-
-
-
-
-        bot.on('sticker', (ctx) => ctx.reply('👍'))
-        bot.hears('hi', (ctx) => ctx.reply('Hey there'))
-        bot.hears('m', (ctx) => ctx.reply('mmm'))
         bot.launch()
-
-
 
     }catch (e) {
         console.log('Error: ', e.message)
     }
-
 }
 
 start()
