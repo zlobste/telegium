@@ -36,12 +36,21 @@ userPosts.enter(async (ctx) =>{
 })
 
 
-userPosts.on('message', (ctx) => ctx.reply('U can use menu for navigation'))//delete
+userPosts.on('message', async (ctx) => {
+    await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id)
+})
 
-userPosts.action('addPost', (ctx) => ctx.scene.enter("addPost"))
+userPosts.action('back', async (ctx) => {
+    await ctx.scene.enter('main', ctx.state)
+})
 
-userPosts.on('callback_query', (ctx) => {
-        console.log(JSON.parse(ctx.update.callback_query.data))
+userPosts.action('addPost', async (ctx) => {
+    await ctx.scene.enter('addPost')
+})
+
+
+userPosts.on('callback_query', async (ctx) => {
+    console.log(JSON.parse(ctx.update.callback_query.data))
 })
 
 

@@ -9,7 +9,8 @@ const addPost = new WizardScene(
         await ctx.editMessageText('Перешлите мне пост или создайте его',
             Extra.HTML().markup((m) => m.inlineKeyboard([
                 [
-                    m.callbackButton('create', 'create')
+                    m.callbackButton('create', 'create'),
+                    m.callbackButton('back', 'back')
                 ]
             ])))
     },
@@ -21,6 +22,11 @@ const addPost = new WizardScene(
 addPost.action('create', async (ctx) => {
     return ctx.wizard.next();
 })
+
+addPost.action('back', async (ctx) => {
+    await ctx.scene.enter('userPosts')
+})
+
 addPost.on('message', async (ctx) => {
     await ctx.telegram.sendCopy(ctx.chat.id, ctx.message)
 })
