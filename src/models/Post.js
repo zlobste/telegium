@@ -6,20 +6,14 @@ const schema = new Schema({
         required: true
     },
     userId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
+        type: String,
         required: true
-    },
-    orders: {
-        type: [Schema.Types.ObjectId],
-        ref: 'Order',
-        required: true
-    },
-    isActive: {
+    }
+    /*isActive: {
         type: Boolean,
         default: true,
         required: true
-    }
+    }*/
 });
 
 

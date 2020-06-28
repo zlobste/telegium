@@ -5,34 +5,60 @@ const userPosts = new Scene('userPosts')
 
 userPosts.enter(async (ctx) =>{
 
-    let entity =  {
+    let entity = {
         type: 'post',
         id: '44324242423'
     }
 
     let json = JSON.stringify(entity);
 
-    await ctx.answerCbQuery()
 
-    await ctx.editMessageText('All your posts',
-        Extra.HTML().markup((m) => m.inlineKeyboard([
+    if (ctx.update.callback_query !== undefined && ctx.update.callback_query.data === 'confirm' ||
+        ctx.update.message !== undefined && ctx.update.message.poll !== undefined) {
 
-            [
-                m.callbackButton('Add post', 'addPost'),
-                m.callbackButton('Back', 'back')
-            ],
-            [
-                m.callbackButton('post1', json),
-            ],
-            [
-                m.callbackButton('post2', 'post2'),
-            ],
-            [
-                m.callbackButton('Next', 'next'),
-                m.callbackButton('Previous', 'previous'),
-            ]
-        ]))
-    )
+        await ctx.reply('All your posts',
+            Extra.HTML().markup((m) => m.inlineKeyboard([
+
+                [
+                    m.callbackButton('Add post', 'addPost'),
+                    m.callbackButton('Back', 'back')
+                ],
+                [
+                    m.callbackButton('post1', json),
+                ],
+                [
+                    m.callbackButton('post2', 'post2'),
+                ],
+                [
+                    m.callbackButton('Next', 'next'),
+                    m.callbackButton('Previous', 'previous'),
+                ]
+            ]))
+        )
+
+    } else {
+        await ctx.editMessageText('All your posts',
+            Extra.HTML().markup((m) => m.inlineKeyboard([
+
+                [
+                    m.callbackButton('Add post', 'addPost'),
+                    m.callbackButton('Back', 'back')
+                ],
+                [
+                    m.callbackButton('post1', json),
+                ],
+                [
+                    m.callbackButton('post2', 'post2'),
+                ],
+                [
+                    m.callbackButton('Next', 'next'),
+                    m.callbackButton('Previous', 'previous'),
+                ]
+            ]))
+        )
+    }
+
+
 })
 
 
