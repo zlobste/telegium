@@ -1,83 +1,82 @@
-const User = require('../models/User');
-const {Extra} = require('telegraf')
-const Scene = require('telegraf/scenes/base')
+const User = require("../models/User");
+const {Extra} = require("telegraf");
+const Scene = require("telegraf/scenes/base");
+const main = new Scene("main");
 
-const main = new Scene('main')
+main.enter(async (ctx) => {
+    try {
+        if (ctx.update.callback_query) {
+            await ctx.answerCbQuery();
+            const menu = await getUserInfo(ctx, ctx.update.callback_query.from.id);
+            await ctx.editMessageText(menu.text, menu.markup);
+        } else if (ctx.update.message.text === "/start") {
+            const candidate = await User.findOne({
+                telegramId: ctx.update.message.from.id,
+            });
 
-main.enter(async (ctx) =>{
+            if (!candidate) {
+                const newUser = new User({
+                    telegramId: ctx.update.message.from.id,
+                });
+                await newUser.save();
+            }
 
-    if (ctx.update.callback_query) {
+            await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id);
+            const menu = await getUserInfo(ctx, ctx.update.message.from.id);
+            await ctx.reply(menu.text, menu.markup);
+        }
+    } catch (e) {
+        console.log(e.message);
+    }
+});
 
-        // user info logic
-        await ctx.answerCbQuery()
-        const menu = await getUserInfo(ctx, ctx.update.callback_query.from.id)
-        await ctx.editMessageText(menu.text, menu.markup)
+main.on("message", async (ctx) => {
+    await ctx.tg
+        .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
+        .catch((e) => console.log(e.message));
+});
 
-    } else if (ctx.update.message.text === '/start') {
+main.action("userPosts", async (ctx) => {
+    await ctx.scene.enter("userPosts").catch((e) => console.log(e.message));
+});
 
-        const candidate = await User.findOne({
-            telegramId: ctx.update.message.from.id
-        })
+const getUserInfo = async (ctx, userId) => {
+    try {
+        let candidate = await User.findOne({
+            telegramId: userId,
+        });
 
         if (!candidate) {
             const newUser = new User({
-                telegramId: ctx.update.message.from.id,
+                telegramId: userId,
             });
-            await newUser.save()
+            await newUser.save();
+            candidate = newUser;
         }
 
-        await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id)
-
-        const menu = await getUserInfo(ctx, ctx.update.message.from.id)
-        await ctx.reply(menu.text, menu.markup)
+        return {
+            text: `**User info**\nuserID: ${candidate.telegramId}\nbalance: ${candidate.balance}`,
+            markup: Extra.HTML().markup((m) =>
+                m.inlineKeyboard([
+                    [m.callbackButton("All channels", "All channels")],
+                    [
+                        m.callbackButton("User posts", "userPosts"),
+                        m.callbackButton("User channels", "User channels"),
+                    ],
+                    [
+                        m.callbackButton("Notifications", "Notifications"),
+                        m.callbackButton("Basket", "Basket"),
+                    ],
+                    [
+                        m.callbackButton("Put money", "Put money"),
+                        m.callbackButton("Get money", "Get money"),
+                    ],
+                ])
+            ),
+        };
+    } catch (e) {
+        console.log(e.message);
     }
-})
+};
 
-
-main.on('message', async (ctx) => {
-    await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id)
-})
-
-main.action('userPosts', async (ctx) => {
-    await ctx.scene.enter('userPosts')
-})
-
-const getUserInfo = async (ctx, userId) => {
-
-    let candidate = await User.findOne({
-        telegramId: userId
-    })
-
-    if (!candidate) {
-        const newUser = new User({
-            telegramId: userId
-        });
-        await newUser.save()
-        candidate = newUser
-    }
-
-    return {
-        text: `**User info**\nuserID: ${candidate.telegramId}\nbalance: ${candidate.balance}`,
-        markup: Extra.HTML().markup((m) => m.inlineKeyboard([
-
-            [
-                m.callbackButton('All channels', 'All channels')
-            ],
-            [
-                m.callbackButton('User posts', 'userPosts'),
-                m.callbackButton('User channels', 'User channels')
-            ],
-            [
-                m.callbackButton('Notifications', 'Notifications'),
-                m.callbackButton('Basket', 'Basket'),
-            ],
-            [
-                m.callbackButton('Put money', 'Put money'),
-                m.callbackButton('Get money', 'Get money'),
-            ]
-        ]))
-    }
-}
-
-
-module.exports = main
+module.exports = main;

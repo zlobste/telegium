@@ -1,17 +1,15 @@
-const {Schema, model} = require('mongoose');
+const {Schema, model} = require("mongoose");
 
 const schema = new Schema({
-
-     orderId: {
+    orderId: {
         type: Schema.Types.ObjectId,
-        ref: 'Order',
-        required: true
+        ref: "Order",
+        required: true,
     },
     timePoint: {
         type: Date,
-        required: true
-    }
+        required: true,
+    },
 });
 
-
-module.exports = model('OrderPosting', schema);
+module.exports = model("OrderPosting", schema);

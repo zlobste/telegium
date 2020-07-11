@@ -15,9 +15,13 @@
     "@mtproto/core": "^3.2.0",
     "dotenv": "^8.2.0",
     "mongoose": "^5.9.18",
+    "mtproto-storage-fs": "^0.3.1",
+    "prompt": "^1.0.0",
     "telegraf": "^3.38.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.4"
+    "node-localstorage": "^2.1.6",
+    "nodemon": "^2.0.4",
+    "prettier": "2.0.5"
   }
 }

@@ -1,25 +1,23 @@
-const {Schema, model} = require('mongoose');
+const {Schema, model} = require("mongoose");
 
 const schema = new Schema({
-
     userId: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+        ref: "User",
+        required: true,
     },
     time: {
         type: Date,
-        required: true
+        required: true,
     },
     oldBalance: {
         type: Number,
-        required: true
+        required: true,
     },
     newBalance: {
         type: Number,
-        required: true
-    }
+        required: true,
+    },
 });
 
-
-module.exports = model('BalanceHistory', schema);
+module.exports = model("BalanceHistory", schema);

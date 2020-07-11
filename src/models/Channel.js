@@ -1,30 +1,30 @@
-const {Schema, model} = require('mongoose');
+const {Schema, model} = require("mongoose");
 
 const schema = new Schema({
     telegramId: {
         type: Number,
-        required: true
+        required: true,
     },
     userId: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+        ref: "User",
+        required: true,
     },
     rating: {
         type: Number,
         default: 0,
-        required: true
+        required: true,
     },
     autoposting: {
         type: Boolean,
         default: false,
-        required: true
-    }
+        required: true,
+    },
+    category: {
+        type: Schema.Types.ObjectId,
+        ref: "ChannelCategory",
+        required: true,
+    },
 });
 
-
-module.exports = model('Channel', schema);
-
-
-
-
+module.exports = model("Channel", schema);

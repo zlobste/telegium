@@ -1,48 +1,45 @@
-require('dotenv').config()
-const mongoose = require('mongoose')
-const session = require('telegraf/session');
-const {Telegraf} = require('telegraf')
-const Stage = require('telegraf/stage');
-const main = require('./src/scenes/main')
-const userPosts = require('./src/scenes/userPosts')
-const addPost = require('./src/scenes/addPost')
-
+require("dotenv").config();
+const mongoose = require("mongoose");
+const session = require("telegraf/session");
+const {Telegraf} = require("telegraf");
+const Stage = require("telegraf/stage");
+const main = require("./src/scenes/main");
+const userPosts = require("./src/scenes/userPosts");
+const addPost = require("./src/scenes/addPost");
+const mtproto = require("./mtproto");
 
 async function start() {
+  try {
+    mongoose.connect(process.env.DB_LINK, {
+      useUnifiedTopology: true,
+      useNewUrlParser: true,
+      useCreateIndex: true,
+    });
 
-    try {
-        mongoose.connect(process.env.DB_LINK, {
-            useUnifiedTopology: true,
-            useNewUrlParser: true,
-            useCreateIndex: true
-        })
+    const bot = new Telegraf(process.env.BOT_TOKEN);
 
+    const stage = new Stage();
 
-        const bot = new Telegraf(process.env.BOT_TOKEN)
+    stage.register(main);
+    stage.register(userPosts);
+    stage.register(addPost);
 
-        const stage = new Stage()
+    bot.use(session());
+    bot.use(stage.middleware());
 
-        stage.register(main)
-        stage.register(userPosts)
-        stage.register(addPost)
+    bot.start(async (ctx) => {
+      await ctx.scene.enter("main");
+    });
 
-        bot.use(session())
-        bot.use(stage.middleware())
+    bot.catch((err, ctx) => {
+      console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
+    });
 
-
-        bot.start(async (ctx) => {
-            await ctx.scene.enter('main')
-        })
-
-        bot.catch((err, ctx) => {
-            console.log(`Ooops, encountered an error for ${ctx.updateType}`, err)
-        })
-
-        bot.launch()
-
-    }catch (e) {
-        console.log('Error: ', e.message)
-    }
+    bot.launch();
+    //await mtproto.authenticate()
+  } catch (e) {
+    console.log("Error: ", e.message);
+  }
 }
 
-start()
+start();
