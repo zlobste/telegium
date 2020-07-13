@@ -5,7 +5,10 @@ const {Telegraf} = require("telegraf");
 const Stage = require("telegraf/stage");
 const main = require("./src/scenes/main");
 const userPosts = require("./src/scenes/userPosts");
+const editPost = require("./src/scenes/editPost");
+const addName = require("./src/scenes/addName");
 const addPost = require("./src/scenes/addPost");
+const viewPost = require("./src/scenes/viewPost");
 const mtproto = require("./mtproto");
 
 async function start() {
@@ -22,7 +25,10 @@ async function start() {
 
     stage.register(main);
     stage.register(userPosts);
+    stage.register(editPost);
+    stage.register(addName);
     stage.register(addPost);
+    stage.register(viewPost);
 
     bot.use(session());
     bot.use(stage.middleware());

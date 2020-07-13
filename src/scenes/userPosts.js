@@ -1,106 +1,133 @@
 const {Extra} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
+const Markup = require("telegraf/markup");
 const Post = require("../models/Post");
 const userPosts = new Scene("userPosts");
-const {getChannelMessages} = require("../../mtproto");
 
 userPosts.enter(async (ctx) => {
+  try {
+    const keyboard = await getPosts(ctx.update.callback_query.message.chat.id);
+    await ctx.answerCbQuery();
+
     if (
-        (ctx.update.callback_query !== undefined &&
+        (ctx.update.callback_query &&
             ctx.update.callback_query.data === "confirm") ||
-        (ctx.update.message !== undefined && ctx.update.message.poll !== undefined)
+        (ctx.update.message && ctx.update.message.poll)
     ) {
-        await ctx.reply(
-            "All your posts",
-            Extra.HTML().markup((m) =>
-                m.inlineKeyboard([
-                    [
-                        m.callbackButton("Add post", "addPost"),
-                        m.callbackButton("Back", "back"),
-                    ],
-                    [m.callbackButton("post1", "post1")],
-                    [m.callbackButton("post2", "post2")],
-                    [
-                        m.callbackButton("Next", "next"),
-                        m.callbackButton("Previous", "previous"),
-                    ],
-                ])
-            )
-        );
+      await ctx.reply(keyboard.text, keyboard.markup);
     } else {
-        await ctx.editMessageText(
-            "All your posts",
-            Extra.HTML().markup((m) =>
-                m.inlineKeyboard([
-                    [
-                        m.callbackButton("Add post", "addPost"),
-                        m.callbackButton("Back", "back"),
-                    ],
-                    [m.callbackButton("post1", "post1")],
-                    [m.callbackButton("post2", "post2")],
-                    [
-                        m.callbackButton("Next", "next"),
-                        m.callbackButton("Previous", "previous"),
-                    ],
-                ])
-            )
-        );
+      await ctx.editMessageText(keyboard.text, keyboard.markup);
     }
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
-const getPosts = async (id) => {
-    try {
-        /*let entity = {
-                type: 'post',
-                id: '44324242423'
-            };
-
-            let json = JSON.stringify(entity)*/
-
-        const clientPosts = Post.find({userId: id}).map((x) => x.telegramId);
-
-        await getChannelMessages(process.env.STORAGE, clientPosts).then((result) =>
-            result.forEach((x) => console.log(x))
-        );
-
-        return {
-            text: "",
-            markup: Extra.HTML().markup((m) =>
-                m.inlineKeyboard([
-                    [
-                        m.callbackButton("Add post", "addPost"),
-                        m.callbackButton("Back", "back"),
-                    ],
-                    ...clientPosts,
-                    [
-                        m.callbackButton("Next", "next"),
-                        m.callbackButton("Previous", "previous"),
-                    ],
-                ])
-            ),
-        };
-    } catch (e) {
-        console.log(e.message);
-    }
-};
+userPosts.start(async (ctx) => {
+  await ctx.scene.enter("main").catch((e) => console.log(e.message));
+});
 
 userPosts.on("message", async (ctx) => {
-    await ctx.tg
-        .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
-        .catch((e) => console.log(e.message));
+  await ctx.tg
+      .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
+      .catch((e) => console.log(e.message));
 });
 
 userPosts.action("back", async (ctx) => {
-    await ctx.scene.enter("main", ctx.state).catch((e) => console.log(e.message));
+  await ctx.scene.enter("main", ctx.state).catch((e) => console.log(e.message));
 });
 
 userPosts.action("addPost", async (ctx) => {
-    await ctx.scene.enter("addPost").catch((e) => console.log(e.message));
+  await ctx.scene.enter("addName").catch((e) => console.log(e.message));
 });
 
 userPosts.on("callback_query", async (ctx) => {
-    //show post logic
-    // console.log(JSON.parse(ctx.update.callback_query.data))
+  try {
+    await ctx.answerCbQuery();
+
+    const data = JSON.parse(ctx.update.callback_query.data);
+
+    if (data.action === "getPost") {
+      await ctx.scene.enter("viewPost");
+    } else if (data.action === "next") {
+      const keyboard = await getPosts(
+          ctx.update.callback_query.message.chat.id,
+          data.skip + data.limit
+      );
+
+      if (keyboard) {
+        await ctx.editMessageText(keyboard.text, keyboard.markup);
+      }
+    } else if (data.action === "previous" && data.skip > 0) {
+      const keyboard = await getPosts(
+          ctx.update.callback_query.message.chat.id,
+          data.skip - data.limit
+      );
+
+      await ctx.editMessageText(keyboard.text, keyboard.markup);
+    }
+  } catch (e) {
+    console.log(e.message);
+  }
 });
+
+const getPosts = async (userId, skip = 0, limit = 5) => {
+  try {
+    let posts = await Post.find({
+      userId: userId,
+      completed: true,
+    })
+        .skip(skip)
+        .limit(limit);
+
+    if (posts.length === 0) {
+      return null;
+    }
+
+    posts = posts.map((x) => [
+      Markup.callbackButton(
+          x.name,
+          JSON.stringify({
+            action: "getPost",
+            id: x.telegramId,
+            userId: x.userId,
+          })
+      ),
+    ]);
+
+    const keyboard = [
+      [
+        Markup.callbackButton("Add post", "addPost"),
+        Markup.callbackButton("Back", "back"),
+      ],
+      ...posts,
+      [
+        Markup.callbackButton(
+            "Previous",
+            JSON.stringify({
+              action: "previous",
+              limit: limit,
+              skip: skip,
+            })
+        ),
+        Markup.callbackButton(
+            "Next",
+            JSON.stringify({
+              action: "next",
+              limit: limit,
+              skip: skip,
+            })
+        ),
+      ],
+    ];
+
+    return {
+      text: "Все ваши посты, которые вы создали",
+      markup: Extra.markdown().markup((m) => m.inlineKeyboard(keyboard)),
+    };
+  } catch (e) {
+    console.log(e.message);
+  }
+};
 
 module.exports = userPosts;
