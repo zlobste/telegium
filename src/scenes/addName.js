@@ -6,6 +6,8 @@ const Post = require("../models/Post");
 
 addName.enter(async (ctx) => {
   try {
+
+    await ctx.answerCbQuery();
     await ctx.editMessageText(
         "Пришлите название вашего поста",
         Extra.HTML().markup((m) =>
@@ -62,7 +64,7 @@ addName.on("message", async (ctx) => {
         })
 */
 
-    await ctx.scene.enter("_addPost");
+    await ctx.scene.enter("addPost");
   } catch (e) {
     console.log(e.message);
   }

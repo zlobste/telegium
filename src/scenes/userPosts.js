@@ -6,15 +6,35 @@ const userPosts = new Scene("userPosts");
 
 userPosts.enter(async (ctx) => {
   try {
-    const keyboard = await getPosts(ctx.update.callback_query.message.chat.id);
+    let keyboard = await getPosts(ctx.update.callback_query.message.chat.id);
     await ctx.answerCbQuery();
 
+    if (!keyboard) {
+      keyboard = {
+        text: 'Пока у вас 0 постов. Все ваши посты будут отображатся в этом меню',
+        markup: Extra.markdown().markup((m) => m.inlineKeyboard(
+            [[
+              Markup.callbackButton("Add post", "addPost"),
+              Markup.callbackButton("Back", "back"),
+            ]]
+        ))
+      }
+    }
+
+
+    //console.log(ctx.update)
+
     if (
-        (ctx.update.callback_query &&
-            ctx.update.callback_query.data === "confirm") ||
-        (ctx.update.message && ctx.update.message.poll)
+        ctx.update.callback_query &&
+        (
+            ctx.update.callback_query.data === 'confirm' ||
+            ctx.update.callback_query.data === 'back' ||
+            ctx.update.callback_query.data.indexOf('delete') != -1
+        )
     ) {
+
       await ctx.reply(keyboard.text, keyboard.markup);
+
     } else {
       await ctx.editMessageText(keyboard.text, keyboard.markup);
     }
