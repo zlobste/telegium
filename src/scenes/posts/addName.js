@@ -2,7 +2,7 @@ const Markup = require("telegraf/markup");
 const {Extra} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
 const addName = new Scene("addName");
-const Post = require("../models/Post");
+const Post = require("../../models/Post");
 
 addName.enter(async (ctx) => {
   try {

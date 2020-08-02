@@ -1,7 +1,7 @@
 const Markup = require("telegraf/markup");
 const {Extra} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
-const Post = require("../models/Post");
+const Post = require("../../models/Post");
 const viewPost = new Scene("viewPost");
 
 viewPost.enter(async (ctx) => {
@@ -86,17 +86,23 @@ viewPost.on("callback_query", async (ctx) => {
 
     if (data.action === 'delete') {
 
-      await Post.deleteOne({
-        telegramId: data.id,
-        userId: ctx.update.callback_query.message.chat.id
-      }).catch(e => console.log(e.message));
+        await Post.deleteOne({
+            telegramId: data.id,
+            userId: ctx.update.callback_query.message.chat.id
+        }).catch(e => console.log(e.message));
 
-      await ctx.tg.deleteMessage(
-          ctx.update.callback_query.message.chat.id,
-          ctx.update.callback_query.message.message_id
-      ).catch(e => console.log(e.message));
 
-      await ctx.scene.enter("userPosts")
+        await ctx.tg.deleteMessage(
+            ctx.update.callback_query.message.chat.id,
+            ctx.update.callback_query.message.message_id
+        ).catch(e => console.log(e.message));
+
+        await ctx.tg.deleteMessage(
+            `-100${process.env.STORAGE}`,
+            data.id
+        ).catch(e => console.log(e.message));
+
+        await ctx.scene.enter("userPosts")
 
     }
   } catch (e) {

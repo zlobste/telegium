@@ -2,11 +2,11 @@ const {Schema, model} = require("mongoose");
 
 const schema = new Schema({
     telegramId: {
-        type: Number,
+        type: String,
         required: true,
     },
     userId: {
-        type: Schema.Types.ObjectId,
+        type: String,
         ref: "User",
         required: true,
     },
@@ -23,6 +23,11 @@ const schema = new Schema({
     category: {
         type: Schema.Types.ObjectId,
         ref: "ChannelCategory",
+        //required: true,
+    },
+    completed: {
+        type: Boolean,
+        default: false,
         required: true,
     },
 });

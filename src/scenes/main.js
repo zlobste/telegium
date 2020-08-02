@@ -31,22 +31,29 @@ main.enter(async (ctx) => {
 });
 
 main.start(async (ctx) => {
-  await ctx.scene.enter("main");
+    await ctx.scene.enter("main");
 });
 
 main.on("message", async (ctx) => {
-  await ctx.tg
-      .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
-      .catch((e) => console.log(e.message));
+    await ctx.tg
+        .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
+        .catch((e) => console.log(e.message));
 });
+
+
+main.action("userChannels", async (ctx) => {
+    await ctx.scene.enter("userChannels").catch((e) => console.log(e.message));
+});
+
 
 main.action("userPosts", async (ctx) => {
-  await ctx.scene.enter("userPosts").catch((e) => console.log(e.message));
+    await ctx.scene.enter("userPosts").catch((e) => console.log(e.message));
 });
 
+
 const getUserInfo = async (ctx, userId) => {
-  try {
-    let candidate = await User.findOne({
+    try {
+        let candidate = await User.findOne({
       telegramId: userId,
     });
 
@@ -63,10 +70,10 @@ const getUserInfo = async (ctx, userId) => {
       markup: Extra.HTML().markup((m) =>
           m.inlineKeyboard([
             [m.callbackButton("All channels", "All channels")],
-            [
-              m.callbackButton("User posts", "userPosts"),
-              m.callbackButton("User channels", "User channels"),
-            ],
+              [
+                  m.callbackButton("User posts", "userPosts"),
+                  m.callbackButton("User channels", "userChannels"),
+              ],
             [
               m.callbackButton("Notifications", "Notifications"),
               m.callbackButton("Basket", "Basket"),
