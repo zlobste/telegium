@@ -25,10 +25,22 @@ const schema = new Schema({
         ref: "ChannelCategory",
         //required: true,
     },
-    completed: {
+    timeOfActivePost: {
+        type: String,
+        required: false,
+    },
+    price: {
+        type: Number,
+        default: 0,
+        required: true,
+    },
+    additionCompleted: {
         type: Boolean,
         default: false,
-        required: true,
+    },
+    changeCompleted: {
+        type: Boolean,
+        default: true,
     },
 });
 

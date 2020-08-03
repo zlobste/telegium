@@ -9,7 +9,7 @@ viewChannel.enter(async (ctx) => {
         await ctx.answerCbQuery();
         const data = JSON.parse(ctx.update.callback_query.data);
 
-        if (data.action === "getChannel") {
+        if (data.action === "getChannel" || data.action === "back") {
 
             const channel = await Channel.findOne({
                 telegramId: data.id,
@@ -21,6 +21,7 @@ viewChannel.enter(async (ctx) => {
                 const info = await ctx.tg.getChat(data.id)
                 const countOfMembers = await ctx.tg.getChatMembersCount(data.id)
 
+
                 await ctx.editMessageText(
                     `ID: ${info.id}\nTitle: ${info.title}\nDescription: ${info.description || "-"}\nMembers count: ${countOfMembers}`,
                     Extra.markdown().markup((m) => m.inlineKeyboard(
@@ -30,7 +31,13 @@ viewChannel.enter(async (ctx) => {
                                 Markup.callbackButton("Back", "back"),
                             ],
                             [
-                                Markup.callbackButton("Channel settings", "channelSettings"),
+                                Markup.callbackButton(
+                                    "Channel settings",
+                                    JSON.stringify({
+                                        action: "channelSettings",
+                                        id: data.id
+                                    })
+                                )
                             ]
                         ]
                     ))
@@ -51,11 +58,19 @@ viewChannel.action("back", async (ctx) => {
 
 });
 
-viewChannel.action("back", async (ctx) => {
+viewChannel.on("callback_query", async (ctx) => {
+    try {
 
-    await ctx.scene.enter("channelSettings").catch((e) => console.log(e.message));
+        const data = JSON.parse(ctx.update.callback_query.data);
 
-});
+        if (data.action === "channelSettings") {
+            await ctx.scene.enter("channelSettings").catch((e) => console.log(e.message));
+        }
+
+    } catch (e) {
+        console.log(e.message)
+    }
+})
 
 
 module.exports = viewChannel;

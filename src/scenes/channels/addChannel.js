@@ -58,7 +58,7 @@ addChannel.on("message", async (ctx) => {
                                     const newChannel = new Channel({
                                         telegramId: ctx.update.message.forward_from_chat.id,
                                         userId: ctx.update.message.from.id,
-                                        completed: true
+                                        additionCompleted: true
                                     });
 
                                     await newChannel.save();

@@ -12,8 +12,10 @@ const viewPost = require("./src/scenes/posts/viewPost");
 const userChannels = require("./src/scenes/channels/userChannels")
 const addChannel = require("./src/scenes/channels/addChannel")
 const viewChannel = require("./src/scenes/channels/viewChannel")
-
-
+const channelSettings = require("./src/scenes/channels/settings/channelSettings")
+const changePrice = require("./src/scenes/channels/settings/changePrice")
+const changeAutoposting = require("./src/scenes/channels/settings/changeAutoposting")
+const changePostTime = require("./src/scenes/channels/settings/changePostTime")
 const mtproto = require("./mtproto");
 
 async function start() {
@@ -37,6 +39,27 @@ async function start() {
         stage.register(userChannels);
         stage.register(addChannel);
         stage.register(viewChannel);
+        stage.register(channelSettings);
+        stage.register(changePrice);
+        stage.register(changeAutoposting);
+        stage.register(changePostTime);
+
+
+        /*stage.register([
+            main,
+            userPosts,
+            editPost,
+            addName,
+            addPost,
+            viewPost,
+            userChannels,
+            addChannel,
+            viewChannel,
+            channelSettings,
+            changePrice,
+            changeAutoposting
+        ])*/
+
 
         bot.use(session());
         bot.use(stage.middleware());

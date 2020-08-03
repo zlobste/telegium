@@ -7,7 +7,7 @@ const userChannels = new Scene("userChannels");
 userChannels.enter(async (ctx) => {
     try {
 
-        await ctx.answerCbQuery();
+
         let keyboard
         if (ctx.update.callback_query) {
             keyboard = await getChannels(ctx, ctx.update.callback_query.message.chat.id);
@@ -37,9 +37,11 @@ userChannels.enter(async (ctx) => {
             )
         ) {
 
+            await ctx.answerCbQuery();
             await ctx.editMessageText(keyboard.text, keyboard.markup);
 
         } else {
+
 
             await ctx.reply(keyboard.text, keyboard.markup);
 
@@ -104,7 +106,7 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
     try {
         let channels = await Channel.find({
             userId: userId,
-            completed: true,
+            additionCompleted: true,
         })
             .skip(skip)
             .limit(limit);
