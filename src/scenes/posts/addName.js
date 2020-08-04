@@ -6,7 +6,6 @@ const Post = require("../../models/Post");
 
 addName.enter(async (ctx) => {
   try {
-
     await ctx.answerCbQuery();
     await ctx.editMessageText(
         "Пришлите название вашего поста",

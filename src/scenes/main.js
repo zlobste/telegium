@@ -40,48 +40,45 @@ main.on("message", async (ctx) => {
         .catch((e) => console.log(e.message));
 });
 
-
 main.action("userChannels", async (ctx) => {
     await ctx.scene.enter("userChannels").catch((e) => console.log(e.message));
 });
-
 
 main.action("userPosts", async (ctx) => {
     await ctx.scene.enter("userPosts").catch((e) => console.log(e.message));
 });
 
-
 const getUserInfo = async (ctx, userId) => {
     try {
         let candidate = await User.findOne({
-      telegramId: userId,
-    });
+            telegramId: userId,
+        });
 
-    if (!candidate) {
-      const newUser = new User({
-        telegramId: userId,
-      });
-      await newUser.save();
-      candidate = newUser;
-    }
+        if (!candidate) {
+            const newUser = new User({
+                telegramId: userId,
+            });
+            await newUser.save();
+            candidate = newUser;
+        }
 
     return {
       text: `**User info**\nuserID: ${candidate.telegramId}\nbalance: ${candidate.balance}`,
       markup: Extra.HTML().markup((m) =>
           m.inlineKeyboard([
-            [m.callbackButton("All channels", "All channels")],
+              [m.callbackButton("All channels", "All channels")],
               [
                   m.callbackButton("User posts", "userPosts"),
                   m.callbackButton("User channels", "userChannels"),
               ],
-            [
-              m.callbackButton("Notifications", "Notifications"),
-              m.callbackButton("Basket", "Basket"),
-            ],
-            [
-              m.callbackButton("Put money", "Put money"),
-              m.callbackButton("Get money", "Get money"),
-            ],
+              [
+                  m.callbackButton("Notifications", "Notifications"),
+                  m.callbackButton("Basket", "Basket"),
+              ],
+              [
+                  m.callbackButton("Put money", "Put money"),
+                  m.callbackButton("Get money", "Get money"),
+              ],
           ])
       ),
     };

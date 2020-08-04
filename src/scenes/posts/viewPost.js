@@ -16,48 +16,47 @@ viewPost.enter(async (ctx) => {
       });
 
       if (post) {
-
         await ctx.tg.deleteMessage(
             ctx.update.callback_query.message.chat.id,
             ctx.update.callback_query.message.message_id
         );
 
-        const resp = await ctx.tg.forwardMessage(
-            `-100${process.env.STORAGE}`,
-            `-100${process.env.STORAGE}`,
-            post.telegramId
-        );
+          const resp = await ctx.tg.forwardMessage(
+              `-100${process.env.STORAGE}`,
+              `-100${process.env.STORAGE}`,
+              post.telegramId
+          );
 
+          delete resp.forward_from;
 
-        delete resp.forward_from
+          let keyboard = [
+              [
+                  Markup.callbackButton("Back", "back"),
+                  Markup.callbackButton(
+                      "Delete",
+                      JSON.stringify({
+                          action: "delete",
+                          id: data.id,
+                      })
+                  ),
+              ],
+          ];
 
-        let keyboard = [[
-          Markup.callbackButton("Back", "back"),
-          Markup.callbackButton("Delete", JSON.stringify({
-            action: 'delete',
-            id: data.id
-          }))
-        ]];
-
-        if (resp.reply_markup) {
-          if (resp.reply_markup.inline_keyboard) {
-            keyboard = resp.reply_markup.inline_keyboard.concat(
-                keyboard
-            );
+          if (resp.reply_markup) {
+              if (resp.reply_markup.inline_keyboard) {
+                  keyboard = resp.reply_markup.inline_keyboard.concat(keyboard);
+              }
           }
-        }
 
-        await ctx.telegram.sendCopy(
-            ctx.update.callback_query.message.chat.id,
-            resp,
-            Extra.markdown().markup((m) => m.inlineKeyboard(keyboard))
-        );
+          await ctx.telegram.sendCopy(
+              ctx.update.callback_query.message.chat.id,
+              resp,
+              Extra.markdown().markup((m) => m.inlineKeyboard(keyboard))
+          );
 
-
-        await ctx.tg.deleteMessage(
-            `-100${process.env.STORAGE}`,
-            resp.message_id
-        ).catch(e => console.log(e.message))
+          await ctx.tg
+              .deleteMessage(`-100${process.env.STORAGE}`, resp.message_id)
+              .catch((e) => console.log(e.message));
       }
     }
   } catch (e) {
@@ -65,48 +64,44 @@ viewPost.enter(async (ctx) => {
   }
 });
 
-
 viewPost.action("back", async (ctx) => {
+    await ctx.answerCbQuery();
+    await ctx.tg
+        .deleteMessage(
+            ctx.update.callback_query.message.chat.id,
+            ctx.update.callback_query.message.message_id
+        )
+        .catch((e) => console.log(e.message));
 
-  await ctx.answerCbQuery();
-  await ctx.tg.deleteMessage(
-      ctx.update.callback_query.message.chat.id,
-      ctx.update.callback_query.message.message_id
-  ).catch((e) => console.log(e.message));
-
-  await ctx.scene.enter("userPosts").catch((e) => console.log(e.message));
-
+    await ctx.scene.enter("userPosts").catch((e) => console.log(e.message));
 });
-
 
 viewPost.on("callback_query", async (ctx) => {
   try {
-    await ctx.answerCbQuery();
-    const data = JSON.parse(ctx.update.callback_query.data)
+      await ctx.answerCbQuery();
+      const data = JSON.parse(ctx.update.callback_query.data);
 
-    if (data.action === 'delete') {
+      if (data.action === "delete") {
+          await Post.deleteOne({
+              telegramId: data.id,
+              userId: ctx.update.callback_query.message.chat.id,
+          }).catch((e) => console.log(e.message));
 
-        await Post.deleteOne({
-            telegramId: data.id,
-            userId: ctx.update.callback_query.message.chat.id
-        }).catch(e => console.log(e.message));
+          await ctx.tg
+              .deleteMessage(
+                  ctx.update.callback_query.message.chat.id,
+                  ctx.update.callback_query.message.message_id
+              )
+              .catch((e) => console.log(e.message));
 
+          await ctx.tg
+              .deleteMessage(`-100${process.env.STORAGE}`, data.id)
+              .catch((e) => console.log(e.message));
 
-        await ctx.tg.deleteMessage(
-            ctx.update.callback_query.message.chat.id,
-            ctx.update.callback_query.message.message_id
-        ).catch(e => console.log(e.message));
-
-        await ctx.tg.deleteMessage(
-            `-100${process.env.STORAGE}`,
-            data.id
-        ).catch(e => console.log(e.message));
-
-        await ctx.scene.enter("userPosts")
-
-    }
+          await ctx.scene.enter("userPosts");
+      }
   } catch (e) {
-    console.log(e.message)
+      console.log(e.message);
   }
 });
 

@@ -7,4 +7,4 @@ const schema = new Schema({
   },
 });
 
-module.exports = model("ChannelCategory", schema);
+module.exports = model("Category", schema);

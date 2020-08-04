@@ -5,162 +5,140 @@ const changePrice = new Scene("changePrice");
 const Channel = require("../../../models/Channel");
 
 changePrice.enter(async (ctx) => {
-    try {
+  try {
+    let data;
+    let channel;
 
-        let data;
-        let channel;
-
-        if (ctx.update.callback_query) {
-            data = JSON.parse(ctx.update.callback_query.data);
-        }
-
-        if (data) {
-
-            channel = await Channel.findOne({telegramId: data.id})
-            channel.changeCompleted = false
-            await channel.save()
-
-        } else {
-
-            channel = await Channel.findOne({
-                userId: ctx.update.message.from.id,
-                changeCompleted: false
-            })
-
-            if (channel) {
-                data = {
-                    id: channel.telegramId,
-                    action: "reply"
-                }
-            } else {
-                return ctx.reply("Ошибка! Канал не найден в системе!")
-            }
-        }
-
-
-        if (channel) {
-
-            const chatInfo = await ctx.tg.getChat(data.id)
-
-            if (data.action === "reply") {
-
-                await ctx.reply(
-                    `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
-                    Extra.HTML().markup((m) =>
-                        m.inlineKeyboard(
-                            [[
-                                m.callbackButton(
-                                    "Back",
-                                    JSON.stringify({
-                                        action: "back",
-                                        id: data.id
-                                    })
-                                )
-                            ]]
-                        )
-                    )
-                );
-
-            } else {
-
-                await ctx.answerCbQuery();
-                await ctx.editMessageText(
-                    `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
-                    Extra.HTML().markup((m) =>
-                        m.inlineKeyboard(
-                            [[
-                                m.callbackButton(
-                                    "Back",
-                                    JSON.stringify({
-                                        action: "back",
-                                        id: data.id
-                                    })
-                                )
-                            ]]
-                        )
-                    )
-                );
-            }
-
-        } else {
-            return ctx.reply("Ошибка! Канал не найден в системе!")
-        }
-
-    } catch (e) {
-        console.log(e.message);
+    if (ctx.update.callback_query) {
+      data = JSON.parse(ctx.update.callback_query.data);
     }
-});
 
-
-changePrice.start(async (ctx) => {
-
-
-    let channel = await Channel.findOne({
+    if (data) {
+      channel = await Channel.findOne({telegramId: data.id});
+      channel.changeCompleted = false;
+      await channel.save();
+    } else {
+      channel = await Channel.findOne({
         userId: ctx.update.message.from.id,
-        changeCompleted: false
-    })
+        changeCompleted: false,
+      });
+
+      if (channel) {
+        data = {
+          id: channel.telegramId,
+          action: "reply",
+        };
+      } else {
+        return ctx.reply("Ошибка! Канал не найден в системе!");
+      }
+    }
 
     if (channel) {
-        channel.changeCompleted = true
-        await channel.save()
-    }
+      const chatInfo = await ctx.tg.getChat(data.id);
 
-    await ctx.scene.enter("main").catch((e) => console.log(e.message));
+      if (data.action === "reply") {
+        await ctx.reply(
+            `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
+            Extra.HTML().markup((m) =>
+                m.inlineKeyboard([
+                  [
+                    m.callbackButton(
+                        "Back",
+                        JSON.stringify({
+                          action: "back",
+                          id: data.id,
+                        })
+                    ),
+                  ],
+                ])
+            )
+        );
+      } else {
+        await ctx.answerCbQuery();
+        await ctx.editMessageText(
+            `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
+            Extra.HTML().markup((m) =>
+                m.inlineKeyboard([
+                  [
+                    m.callbackButton(
+                        "Back",
+                        JSON.stringify({
+                          action: "back",
+                          id: data.id,
+                        })
+                    ),
+                  ],
+                ])
+            )
+        );
+      }
+    } else {
+      return ctx.reply("Ошибка! Канал не найден в системе!");
+    }
+  } catch (e) {
+    console.log(e.message);
+  }
+});
+
+changePrice.start(async (ctx) => {
+  let channel = await Channel.findOne({
+    userId: ctx.update.message.from.id,
+    changeCompleted: false,
+  });
+
+  if (channel) {
+    channel.changeCompleted = true;
+    await channel.save();
+  }
+
+  await ctx.scene.enter("main").catch((e) => console.log(e.message));
 });
 
 changePrice.on("message", async (ctx) => {
-    try {
+  try {
+
+    let price = Number(ctx.update.message.text);
 
 
-        console.log("price input: ", ctx.update.message.text)
-        let price = Number(ctx.update.message.text)
-        console.log("price number: ", price)
+    if (price) {
+      price = Number(price.toFixed(2));
+      let channel = await Channel.findOne({
+        userId: ctx.update.message.from.id,
+        changeCompleted: false,
+      });
 
-        if (price) {
+      if (channel) {
+        channel.price = price;
+        await channel.save();
 
-            price = Number(price.toFixed(2))
-            let channel = await Channel.findOne({
-                userId: ctx.update.message.from.id,
-                changeCompleted: false
-            })
-
-            if (channel) {
-
-                channel.price = price
-                await channel.save()
-
-                await ctx.scene.enter("changePrice").catch((e) => console.log(e.message));
-
-            }
-
-        } else {
-            return await ctx.reply("Неправильный формат вода!")
-        }
-
-    } catch (e) {
-        console.log(e.message);
+        await ctx.scene
+            .enter("changePrice")
+            .catch((e) => console.log(e.message));
+      }
+    } else {
+      return await ctx.reply("Неправильный формат вода!");
     }
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
-
 changePrice.on("callback_query", async (ctx) => {
-    try {
+  try {
+    const data = JSON.parse(ctx.update.callback_query.data);
 
-        const data = JSON.parse(ctx.update.callback_query.data);
+    if (data.action === "back") {
+      const channel = await Channel.findOne({telegramId: data.id});
+      channel.changeCompleted = true;
+      await channel.save();
 
-        if (data.action === "back") {
-
-            const channel = await Channel.findOne({telegramId: data.id})
-            channel.changeCompleted = true
-            await channel.save()
-
-            await ctx.scene.enter("channelSettings").catch((e) => console.log(e.message));
-
-        }
-
-    } catch (e) {
-        console.log(e.message)
+      await ctx.scene
+          .enter("channelSettings")
+          .catch((e) => console.log(e.message));
     }
-})
+  } catch (e) {
+    console.log(e.message);
+  }
+});
 
 module.exports = changePrice;

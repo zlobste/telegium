@@ -6,7 +6,6 @@ const addChannel = new Scene("addChannel");
 
 addChannel.enter(async (ctx) => {
     try {
-
         await ctx.answerCbQuery();
         await ctx.editMessageText(
             "Для добавления канала нужно соблюдать условия:\n\n" +
@@ -28,76 +27,71 @@ addChannel.action("back", async (ctx) => {
 
 addChannel.on("message", async (ctx) => {
     try {
-
         if (ctx.update.message) {
             if (ctx.update.message.forward_from_chat) {
-
-                const admins = await ctx.tg.getChatAdministrators(ctx.update.message.forward_from_chat.id)
+                const admins = await ctx.tg.getChatAdministrators(
+                    ctx.update.message.forward_from_chat.id
+                );
 
                 if (admins) {
+                    const userAdmin = admins.find(
+                        (x) => x.user.id === ctx.update.message.from.id
+                    );
 
-
-                    const userAdmin = admins.find(x => x.user.id === ctx.update.message.from.id)
-
-                    if (userAdmin && userAdmin.status === 'creator') {
-
-                        const botAdmin = admins.find(x => x.user.is_bot && x.user.username === process.env.BOT_USERNAME)
+                    if (userAdmin && userAdmin.status === "creator") {
+                        const botAdmin = admins.find(
+                            (x) =>
+                                x.user.is_bot && x.user.username === process.env.BOT_USERNAME
+                        );
 
                         if (botAdmin) {
-
                             if (botAdmin.can_post_messages && botAdmin.can_delete_messages) {
-
                                 const candidate = await Channel.findOne({
                                     telegramId: ctx.update.message.forward_from_chat.id,
-                                    userId: ctx.update.message.from.id
+                                    userId: ctx.update.message.from.id,
                                 });
 
                                 if (!candidate) {
-
-
                                     const newChannel = new Channel({
                                         telegramId: ctx.update.message.forward_from_chat.id,
                                         userId: ctx.update.message.from.id,
-                                        additionCompleted: true
+                                        additionCompleted: true,
                                     });
 
                                     await newChannel.save();
 
-                                    await ctx.tg.exportChatInviteLink(newChannel.telegramId)
+                                    await ctx.tg.exportChatInviteLink(newChannel.telegramId);
 
-                                    await ctx.scene.enter("userChannels").catch((e) => console.log(e.message));
-
+                                    await ctx.scene
+                                        .enter("userChannels")
+                                        .catch((e) => console.log(e.message));
                                 } else {
-                                    return await ctx.reply("Вы уже добавили этот канал раньше")
+                                    return await ctx.reply("Вы уже добавили этот канал раньше");
                                 }
-
-
                             } else {
-                                return await ctx.reply("Бот не может добавлять посты и удалять их!\n\n" +
-                                    "Добавьте эти возможности в настройках администраторов канала")
+                                return await ctx.reply(
+                                    "Бот не может добавлять посты и удалять их!\n\n" +
+                                    "Добавьте эти возможности в настройках администраторов канала"
+                                );
                             }
-
                         } else {
-                            return await ctx.reply("Бот не администратор этого канала\n\n" +
-                                "Добавьте бота как администратора канала и дайте ему возможность добавлять и удалять посты")
+                            return await ctx.reply(
+                                "Бот не администратор этого канала\n\n" +
+                                "Добавьте бота как администратора канала и дайте ему возможность добавлять и удалять посты"
+                            );
                         }
-
                     } else {
-
-                        return await ctx.reply("Вы не являетесь владельцем этого канала!")
+                        return await ctx.reply("Вы не являетесь владельцем этого канала!");
                     }
                 }
             } else {
-
-                await ctx.reply("Это сообщение не является пересланным из канала!")
+                await ctx.reply("Это сообщение не является пересланным из канала!");
             }
         }
     } catch (e) {
-
-        await ctx.reply("Бот не является членом этого канала!")
+        await ctx.reply("Бот не является членом этого канала!");
         console.log(e.message);
     }
 });
-
 
 module.exports = addChannel;

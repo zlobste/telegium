@@ -23,11 +23,11 @@ addPost.action("back", async (ctx) => {
 
 addPost.on("message", async (ctx) => {
   try {
-    let post = await Post.findOne({
-      userId: ctx.update.message.chat.id,
-    })
-        .sort({_id: -1})
-        .limit(1);
+      let post = await Post.findOne({
+          userId: ctx.update.message.chat.id,
+      })
+          .sort({_id: -1})
+          .limit(1);
 
     if (post && !post.completed) {
       let keyboard = [
@@ -43,49 +43,49 @@ addPost.on("message", async (ctx) => {
         }
       }
 
-      await ctx.telegram
-          .sendCopy(
-              ctx.update.message.chat.id,
-              ctx.update.message,
-              Extra.markup((m) => m.inlineKeyboard(keyboard))
-          )
-          .catch(async (e) => {
-            await ctx.telegram.sendCopy(
+        await ctx.telegram
+            .sendCopy(
                 ctx.update.message.chat.id,
                 ctx.update.message,
-                Extra.HTML().markup((m) => m.inlineKeyboard(keyboard))
-            );
-          })
-          .catch(async (e) => {
-            await ctx.telegram.sendCopy(
-                ctx.update.message.chat.id,
-                ctx.update.message,
-                Extra.markdown().markup((m) => m.inlineKeyboard(keyboard))
-            );
-          })
-          .catch(async (e) => {
-            console.log(e.message);
-            await ctx.reply(
-                "Перешлите мне пост или создайте его",
-                Extra.HTML().markup((m) =>
-                    m.inlineKeyboard([[m.callbackButton("back", "back")]])
-                )
-            );
-          });
+                Extra.markup((m) => m.inlineKeyboard(keyboard))
+            )
+            .catch(async (e) => {
+                await ctx.telegram.sendCopy(
+                    ctx.update.message.chat.id,
+                    ctx.update.message,
+                    Extra.HTML().markup((m) => m.inlineKeyboard(keyboard))
+                );
+            })
+            .catch(async (e) => {
+                await ctx.telegram.sendCopy(
+                    ctx.update.message.chat.id,
+                    ctx.update.message,
+                    Extra.markdown().markup((m) => m.inlineKeyboard(keyboard))
+                );
+            })
+            .catch(async (e) => {
+                console.log(e.message);
+                await ctx.reply(
+                    "Перешлите мне пост или создайте его",
+                    Extra.HTML().markup((m) =>
+                        m.inlineKeyboard([[m.callbackButton("back", "back")]])
+                    )
+                );
+            });
 
-      await ctx.tg
-          .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
-          .catch((e) => console.log(e.message));
+        await ctx.tg
+            .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
+            .catch((e) => console.log(e.message));
     } else {
-      await ctx.tg
-          .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
-          .catch((e) => {
-            console.log(e.message);
-            console.log(
-                `error deleteMessage, message id: ${ctx.update.message.message_id}, chat id: ${ctx.chat.id}`
-            );
-          });
-      await ctx.scene.enter("addName").catch((e) => console.log(e.message));
+        await ctx.tg
+            .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
+            .catch((e) => {
+                console.log(e.message);
+                console.log(
+                    `error deleteMessage, message id: ${ctx.update.message.message_id}, chat id: ${ctx.chat.id}`
+                );
+            });
+        await ctx.scene.enter("addName").catch((e) => console.log(e.message));
     }
   } catch (e) {
     console.log(e.message);
@@ -101,9 +101,9 @@ addPost.action("confirm", async (ctx) => {
     let keyboard = [];
     if (ctx.update.callback_query.message.reply_markup) {
       if (ctx.update.callback_query.message.reply_markup.inline_keyboard) {
-        keyboard =
-            ctx.update.callback_query.message.reply_markup.inline_keyboard;
-        keyboard.pop();
+          keyboard =
+              ctx.update.callback_query.message.reply_markup.inline_keyboard;
+          keyboard.pop();
         keyboard.pop();
       }
     }
@@ -116,11 +116,11 @@ addPost.action("confirm", async (ctx) => {
         ctx.update.callback_query.message.message_id
     );
 
-    let post = await Post.findOne({
-      userId: ctx.update.callback_query.message.chat.id,
-    })
-        .sort({_id: -1})
-        .limit(1);
+      let post = await Post.findOne({
+          userId: ctx.update.callback_query.message.chat.id,
+      })
+          .sort({_id: -1})
+          .limit(1);
 
     post.telegramId = resp.message_id;
     post.completed = true;

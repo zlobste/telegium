@@ -13,8 +13,8 @@ editPost.enter(async (ctx) => {
 
     if (ctx.update.callback_query.message.reply_markup) {
       if (ctx.update.callback_query.message.reply_markup.inline_keyboard) {
-        let timeKeayboard =
-            ctx.update.callback_query.message.reply_markup.inline_keyboard;
+          let timeKeayboard =
+              ctx.update.callback_query.message.reply_markup.inline_keyboard;
         timeKeayboard.pop();
         timeKeayboard.pop();
         keyboard = timeKeayboard.concat(keyboard);
