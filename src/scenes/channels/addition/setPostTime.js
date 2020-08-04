@@ -1,26 +1,25 @@
 const Markup = require("telegraf/markup");
 const {Extra} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
-const changePostTime = new Scene("changePostTime");
+const setPostTime = new Scene("setPostTime");
 const Channel = require("../../../models/Channel");
 
-changePostTime.enter(async (ctx) => {
+setPostTime.enter(async (ctx) => {
   try {
     let data;
     let channel;
 
     if (ctx.update.callback_query) {
       data = JSON.parse(ctx.update.callback_query.data);
-    }
 
-    if (data) {
-        channel = await Channel.findOne({telegramId: data.id});
-        channel.changeCompleted = false;
-        await channel.save();
+      channel = await Channel.findOne({
+        userId: ctx.update.callback_query.message.chat.id,
+        additionCompleted: false,
+      });
     } else {
       channel = await Channel.findOne({
-        userId: ctx.update.message.from.id,
-        changeCompleted: false,
+        userId: ctx.update.message.chat.id,
+        additionCompleted: false,
       });
 
       if (channel) {
@@ -29,12 +28,12 @@ changePostTime.enter(async (ctx) => {
           action: "reply",
         };
       } else {
-        return ctx.reply("Ошибка! Канал не найден в системе!");
+        return ctx.reply("Ошибка 1 ! Канал не найден в системе!");
       }
     }
 
     if (channel) {
-      const chatInfo = await ctx.tg.getChat(data.id);
+      const chatInfo = await ctx.tg.getChat(channel.telegramId);
 
       if (data.action === "reply") {
         await ctx.reply(
@@ -45,70 +44,35 @@ changePostTime.enter(async (ctx) => {
             } минут\n\nПришлите новое время жизни рекламного поста на Вашем канале\nФормат: 3 (3 часа) или 3:30 (3 часа 30 минут)\n\nP.S. Минимальное евремя жизни поста - 1 час`,
             Extra.HTML().markup((m) =>
                 m.inlineKeyboard([
-                    [
-                        m.callbackButton(
-                            "Back",
-                            JSON.stringify({
-                                action: "back",
-                                id: data.id,
-                            })
-                        ),
-                    ],
+                  [
+                    m.callbackButton(
+                        "Finish",
+                        JSON.stringify({
+                          action: "finish",
+                          id: channel.telegramId,
+                        })
+                    ),
+                  ],
                 ])
             )
         );
       } else {
         await ctx.answerCbQuery();
         await ctx.editMessageText(
-            `Канал: ${chatInfo.title}\nТекущее время жизни поста: ${
-                channel.timeOfActivePost.split(":")[0]
-            } часов ${
-                channel.timeOfActivePost.split(":")[1]
-            } минут\n\nПришлите новое время жизни рекламного поста на Вашем канале\nФормат: 3 (3 часа) или 3:30 (3 часа 30 минут)\n\nP.S. Минимальное евремя жизни поста - 1 час`,
-            Extra.HTML().markup((m) =>
-                m.inlineKeyboard([
-                    [
-                        m.callbackButton(
-                            "Back",
-                            JSON.stringify({
-                                action: "back",
-                                id: data.id,
-                            })
-                        ),
-                    ],
-                ])
-            )
+            `Канал: ${chatInfo.title}\n\nПришлите время жизни рекламного поста на Вашем канале\nФормат: 3 (3 часа) или 3:30 (3 часа 30 минут)\n\nP.S. Минимальное евремя жизни поста - 1 час`
         );
       }
     } else {
-      return ctx.reply("Ошибка! Канал не найден в системе!");
+      return ctx.reply("Ошибка 2! Канал не найден в системе!");
     }
   } catch (e) {
     console.log(e.message);
   }
 });
 
-changePostTime.start(async (ctx) => {
-  let channel = await Channel.findOne({
-    userId: ctx.update.message.from.id,
-    changeCompleted: false,
-  });
-
-  if (channel) {
-    channel.changeCompleted = true;
-    await channel.save();
-  }
-
-  await ctx.scene.enter("main").catch((e) => console.log(e.message));
-});
-
-changePostTime.on("message", async (ctx) => {
+setPostTime.on("message", async (ctx) => {
   try {
-    console.log("time input: ", ctx.update.message.text);
-
     let time = ctx.update.message.text;
-
-    console.log("time convert: ", time);
 
     if (time) {
       time = time.split(":");
@@ -147,17 +111,17 @@ changePostTime.on("message", async (ctx) => {
       }
 
       let channel = await Channel.findOne({
-        userId: ctx.update.message.from.id,
-        changeCompleted: false,
+        userId: ctx.update.message.chat.id,
+        additionCompleted: false,
       });
 
       if (channel) {
-          channel.timeOfActivePost = time;
-          await channel.save();
+        channel.timeOfActivePost = time;
+        await channel.save();
 
-          await ctx.scene
-              .enter("changePostTime")
-              .catch((e) => console.log(e.message));
+        await ctx.scene
+            .enter("setPostTime")
+            .catch((e) => console.log(e.message));
       }
     } else {
       return await ctx.reply("Неправильный формат вода!");
@@ -167,22 +131,23 @@ changePostTime.on("message", async (ctx) => {
   }
 });
 
-changePostTime.on("callback_query", async (ctx) => {
+setPostTime.on("callback_query", async (ctx) => {
   try {
     const data = JSON.parse(ctx.update.callback_query.data);
 
-    if (data.action === "back") {
-        const channel = await Channel.findOne({telegramId: data.id});
-        channel.changeCompleted = true;
-        await channel.save();
+    if (data.action === "finish") {
+      const channel = await Channel.findOne({telegramId: data.id});
+      channel.additionCompleted = true;
+      await channel.save();
 
-        await ctx.scene
-            .enter("channelSettings")
-            .catch((e) => console.log(e.message));
+      await ctx.answerCbQuery();
+      await ctx.scene
+          .enter("userChannels")
+          .catch((e) => console.log(e.message));
     }
   } catch (e) {
     console.log(e.message);
   }
 });
 
-module.exports = changePostTime;
+module.exports = setPostTime;

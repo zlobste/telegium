@@ -14,8 +14,8 @@ changePrice.enter(async (ctx) => {
     }
 
     if (data) {
-        channel = await Channel.findOne({telegramId: data.id});
-        channel.changeCompleted = false;
+      channel = await Channel.findOne({telegramId: data.id});
+      channel.changeCompleted = false;
       await channel.save();
     } else {
       channel = await Channel.findOne({
@@ -41,15 +41,15 @@ changePrice.enter(async (ctx) => {
             `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
             Extra.HTML().markup((m) =>
                 m.inlineKeyboard([
-                    [
-                        m.callbackButton(
-                            "Back",
-                            JSON.stringify({
-                                action: "back",
-                                id: data.id,
-                            })
-                        ),
-                    ],
+                  [
+                    m.callbackButton(
+                        "Back",
+                        JSON.stringify({
+                          action: "back",
+                          id: data.id,
+                        })
+                    ),
+                  ],
                 ])
             )
         );
@@ -59,15 +59,15 @@ changePrice.enter(async (ctx) => {
             `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
             Extra.HTML().markup((m) =>
                 m.inlineKeyboard([
-                    [
-                        m.callbackButton(
-                            "Back",
-                            JSON.stringify({
-                                action: "back",
-                                id: data.id,
-                            })
-                        ),
-                    ],
+                  [
+                    m.callbackButton(
+                        "Back",
+                        JSON.stringify({
+                          action: "back",
+                          id: data.id,
+                        })
+                    ),
+                  ],
                 ])
             )
         );
@@ -109,9 +109,9 @@ changePrice.on("message", async (ctx) => {
         channel.price = price;
         await channel.save();
 
-          await ctx.scene
-              .enter("changePrice")
-              .catch((e) => console.log(e.message));
+        await ctx.scene
+            .enter("changePrice")
+            .catch((e) => console.log(e.message));
       }
     } else {
       return await ctx.reply("Неправильный формат вода!");
@@ -126,13 +126,13 @@ changePrice.on("callback_query", async (ctx) => {
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "back") {
-        const channel = await Channel.findOne({telegramId: data.id});
+      const channel = await Channel.findOne({telegramId: data.id});
       channel.changeCompleted = true;
       await channel.save();
 
-        await ctx.scene
-            .enter("channelSettings")
-            .catch((e) => console.log(e.message));
+      await ctx.scene
+          .enter("channelSettings")
+          .catch((e) => console.log(e.message));
     }
   } catch (e) {
     console.log(e.message);

@@ -34,7 +34,8 @@ userChannels.enter(async (ctx) => {
     if (
         ctx.update.callback_query &&
         (ctx.update.callback_query.data === "userChannels" ||
-            ctx.update.callback_query.data === "back")
+            ctx.update.callback_query.data === "back" ||
+            JSON.parse(ctx.update.callback_query.data).action === "finish")
     ) {
       await ctx.answerCbQuery();
       await ctx.editMessageText(keyboard.text, keyboard.markup);

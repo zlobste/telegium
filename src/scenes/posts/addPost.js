@@ -98,15 +98,15 @@ addPost.action("editPost", async (ctx) => {
 
 addPost.action("confirm", async (ctx) => {
   try {
-    let keyboard = [];
-    if (ctx.update.callback_query.message.reply_markup) {
-      if (ctx.update.callback_query.message.reply_markup.inline_keyboard) {
-          keyboard =
-              ctx.update.callback_query.message.reply_markup.inline_keyboard;
-          keyboard.pop();
-          keyboard.pop();
+      let keyboard = [];
+      if (ctx.update.callback_query.message.reply_markup) {
+          if (ctx.update.callback_query.message.reply_markup.inline_keyboard) {
+              keyboard =
+                  ctx.update.callback_query.message.reply_markup.inline_keyboard;
+              keyboard.pop();
+              keyboard.pop();
+          }
       }
-    }
       if (keyboard.length > 0) {
           await ctx.editMessageReplyMarkup(Markup.inlineKeyboard(keyboard));
       }
@@ -131,8 +131,8 @@ addPost.action("confirm", async (ctx) => {
           ctx.update.callback_query.message.message_id
       );
 
-    await ctx.answerCbQuery();
-    await ctx.scene.enter("userPosts");
+      await ctx.answerCbQuery();
+      await ctx.scene.enter("userPosts");
   } catch (e) {
     console.log(e.message);
   }

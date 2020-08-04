@@ -4,12 +4,12 @@ const Channel = require("../../../models/Channel");
 
 changeAutoposting.enter(async (ctx) => {
   try {
-    const data = JSON.parse(ctx.update.callback_query.data);
+      const data = JSON.parse(ctx.update.callback_query.data);
 
-    let channel = await Channel.findOne({telegramId: data.id});
+      let channel = await Channel.findOne({telegramId: data.id});
 
-    channel.autoposting = !channel.autoposting;
-    await channel.save();
+      channel.autoposting = !channel.autoposting;
+      await channel.save();
 
       await ctx.scene
           .enter("channelSettings")

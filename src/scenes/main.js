@@ -80,11 +80,11 @@ const getUserInfo = async (ctx, userId) => {
                         m.callbackButton("Get money", "Get money"),
                     ],
                 ])
-      ),
-    };
-  } catch (e) {
-    console.log(e.message);
-  }
+            ),
+        };
+    } catch (e) {
+        console.log(e.message);
+    }
 };
 
 module.exports = main;

@@ -1,36 +1,53 @@
 const Scene = require("telegraf/scenes/base");
-const changeCategory = new Scene("changeCategory");
+const setCategory = new Scene("setCategory");
 const Category = require("../../../models/Category");
 const Channel = require("../../../models/Channel");
 const Markup = require("telegraf/markup");
 const {Extra} = require("telegraf");
 
-changeCategory.enter(async (ctx) => {
+setCategory.enter(async (ctx) => {
   try {
-    await ctx.answerCbQuery();
+    const channel = await Channel.findOne({
+      userId: ctx.update.message.chat.id,
+      additionCompleted: false,
+    })
+        .sort({_id: -1})
+        .limit(1);
 
-    const data = JSON.parse(ctx.update.callback_query.data);
+    if (channel) {
+      const data = {id: channel.telegramId};
 
-    const categories = await getCategories(data.id);
-    if (categories) {
-      await ctx.editMessageText(categories.text, categories.markup);
+      const categories = await getCategories(data.id);
+      if (categories) {
+        await ctx.reply(categories.text, categories.markup);
+      } else {
+        return await ctx.editMessageText("Ошибка! Канал не найден");
+      }
     } else {
-      await ctx.editMessageText("Мы ещё не дорбавили категории");
+      return await ctx.editMessageText("Мы ещё не дорбавили категории");
     }
   } catch (e) {
     console.log(e.message);
   }
 });
 
-changeCategory.on("callback_query", async (ctx) => {
+setCategory.on("callback_query", async (ctx) => {
   try {
     await ctx.answerCbQuery();
     const data = JSON.parse(ctx.update.callback_query.data);
 
-    if (data.action === "back") {
-      await ctx.scene
-          .enter("channelSettings")
-          .catch((e) => console.log(e.message));
+    if (data.action === "nextStep") {
+      const channel = await Channel.findOne({telegramId: data.id});
+
+      if (channel) {
+        if (!channel.category) {
+          await ctx.reply("Вы не выбрали категорию Вашего канала!");
+        } else {
+          await ctx.scene
+              .enter("setPrice")
+              .catch((e) => console.log(e.message));
+        }
+      }
     } else if (data.action === "next") {
       const keyboard = await getCategories(data.id, data.skip + data.limit);
 
@@ -79,6 +96,23 @@ const getCategories = async (id, skip = 0, limit = 5) => {
       ),
     ]);
 
+    const channel = await Channel.findOne({telegramId: id});
+    let additionButton = [];
+
+    if (channel.category) {
+      additionButton = [
+        [
+          Markup.callbackButton(
+              "Next step",
+              JSON.stringify({
+                action: "nextStep",
+                id: id,
+              })
+          ),
+        ],
+      ];
+    }
+
     const keyboard = [
       ...categories,
       [
@@ -101,24 +135,21 @@ const getCategories = async (id, skip = 0, limit = 5) => {
             })
         ),
       ],
-      [
-        Markup.callbackButton(
-            "Back",
-            JSON.stringify({
-              action: "back",
-              id: id,
-            })
-        ),
-      ],
+      ...additionButton,
     ];
 
-    const channel = await Channel.findOne({telegramId: id});
-
     if (channel) {
-      return {
-        text: `Ваш канал относится к категории: ${channel.category}\n\nВы можете выбрать только 1 категорию`,
-        markup: Extra.markdown().markup((m) => m.inlineKeyboard(keyboard)),
-      };
+      if (channel.category) {
+        return {
+          text: `Ваш канал относится к категории: ${channel.category}\n\nВы можете выбрать только 1 категорию`,
+          markup: Extra.markdown().markup((m) => m.inlineKeyboard(keyboard)),
+        };
+      } else {
+        return {
+          text: `Выберите тематику Вашего канала!\n\nВы можете выбрать только 1 категорию`,
+          markup: Extra.markdown().markup((m) => m.inlineKeyboard(keyboard)),
+        };
+      }
     } else {
       return null;
     }
@@ -127,4 +158,4 @@ const getCategories = async (id, skip = 0, limit = 5) => {
   }
 };
 
-module.exports = changeCategory;
+module.exports = setCategory;

@@ -55,15 +55,17 @@ addChannel.on("message", async (ctx) => {
                   const newChannel = new Channel({
                     telegramId: ctx.update.message.forward_from_chat.id,
                     userId: ctx.update.message.from.id,
-                    additionCompleted: true,
                   });
 
                   await newChannel.save();
-
                   await ctx.tg.exportChatInviteLink(newChannel.telegramId);
 
-                  await ctx.scene
+                  /*await ctx.scene
                       .enter("userChannels")
+                      .catch((e) => console.log(e.message));*/
+
+                  await ctx.scene
+                      .enter("setCategory")
                       .catch((e) => console.log(e.message));
                 } else {
                   return await ctx.reply("Вы уже добавили этот канал раньше");

@@ -13,26 +13,19 @@ const schema = new Schema({
   rating: {
     type: Number,
     default: 0,
-    required: true,
   },
   autoposting: {
     type: Boolean,
     default: false,
-    required: true,
   },
   category: {
-      type: String,
-      required: false,
-      //required: true,
+    type: String,
   },
   timeOfActivePost: {
     type: String,
-    required: false,
   },
   price: {
     type: Number,
-    default: 0,
-    required: true,
   },
   additionCompleted: {
     type: Boolean,

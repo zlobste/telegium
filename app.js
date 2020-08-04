@@ -17,6 +17,10 @@ const changePrice = require("./src/scenes/channels/settings/changePrice");
 const changeAutoposting = require("./src/scenes/channels/settings/changeAutoposting");
 const changePostTime = require("./src/scenes/channels/settings/changePostTime");
 const changeCategory = require("./src/scenes/channels/settings/changeCategory");
+const setCategory = require("./src/scenes/channels/addition/setCategory");
+const setPrice = require("./src/scenes/channels/addition/setPrice");
+const setPostTime = require("./src/scenes/channels/addition/setPostTime");
+
 const mtproto = require("./mtproto");
 
 async function start() {
@@ -45,6 +49,9 @@ async function start() {
     stage.register(changeAutoposting);
     stage.register(changePostTime);
     stage.register(changeCategory);
+    stage.register(setCategory);
+    stage.register(setPrice);
+    stage.register(setPostTime);
 
     /*stage.register([
             main,

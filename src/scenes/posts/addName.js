@@ -30,18 +30,18 @@ addName.on("message", async (ctx) => {
           .sort({_id: -1})
           .limit(1);
 
-    if (!post || post.completed) {
-      const newPost = new Post({
-        userId: ctx.update.message.chat.id,
-        name: ctx.update.message.text,
-        date: new Date(),
-      });
+      if (!post || post.completed) {
+          const newPost = new Post({
+              userId: ctx.update.message.chat.id,
+              name: ctx.update.message.text,
+              date: new Date(),
+          });
 
-      await newPost.save();
-    } else {
-      post.name = ctx.update.message.text;
-      await post.save();
-    }
+          await newPost.save();
+      } else {
+          post.name = ctx.update.message.text;
+          await post.save();
+      }
 
       await ctx.tg
           .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
@@ -52,18 +52,18 @@ addName.on("message", async (ctx) => {
               );
           });
 
-    /*await ctx.tg.deleteMessage(
-            ctx.chat.id,
-            ctx.update.message.message_id -1
-        )
-            .then( () =>  console.log(`deleteMessage message id: ${ctx.update.message.message_id - 1}, chat id: ${ctx.chat.id}`))
-            .catch( e => {
-                console.log(e.message)
-            console.log(`error deleteMessage - 1, message id: ${ctx.update.message.message_id -1}, chat id: ${ctx.chat.id}`)
-        })
-*/
+      /*await ctx.tg.deleteMessage(
+              ctx.chat.id,
+              ctx.update.message.message_id -1
+          )
+              .then( () =>  console.log(`deleteMessage message id: ${ctx.update.message.message_id - 1}, chat id: ${ctx.chat.id}`))
+              .catch( e => {
+                  console.log(e.message)
+              console.log(`error deleteMessage - 1, message id: ${ctx.update.message.message_id -1}, chat id: ${ctx.chat.id}`)
+          })
+  */
 
-    await ctx.scene.enter("addPost");
+      await ctx.scene.enter("addPost");
   } catch (e) {
     console.log(e.message);
   }

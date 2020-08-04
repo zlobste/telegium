@@ -100,16 +100,4 @@ channelSettings.on("callback_query", async (ctx) => {
     }
 });
 
-channelSettings.action("changeCategory", async (ctx) => {
-    await ctx.scene.enter("changeCategory").catch((e) => console.log(e.message));
-});
-
-channelSettings.action("changePrice", async (ctx) => {
-    await ctx.scene.enter("changePrice").catch((e) => console.log(e.message));
-});
-
-channelSettings.action("changePostTime", async (ctx) => {
-    await ctx.scene.enter("changePostTime").catch((e) => console.log(e.message));
-});
-
 module.exports = channelSettings;

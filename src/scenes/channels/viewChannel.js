@@ -31,19 +31,19 @@ viewChannel.enter(async (ctx) => {
             } часов ${channel.timeOfActivePost.split(":")[1]} минут`,
             Extra.markdown().markup((m) =>
                 m.inlineKeyboard([
-                  [
-                    Markup.urlButton("Go to Channel", info.invite_link),
-                    Markup.callbackButton("Back", "back"),
-                  ],
-                  [
-                    Markup.callbackButton(
-                        "Channel settings",
-                        JSON.stringify({
-                          action: "channelSettings",
-                          id: data.id,
-                        })
-                    ),
-                  ],
+                    [
+                        Markup.urlButton("Go to Channel", info.invite_link),
+                        Markup.callbackButton("Back", "back"),
+                    ],
+                    [
+                        Markup.callbackButton(
+                            "Channel settings",
+                            JSON.stringify({
+                                action: "channelSettings",
+                                id: data.id,
+                            })
+                        ),
+                    ],
                 ])
             )
         );
@@ -65,9 +65,9 @@ viewChannel.on("callback_query", async (ctx) => {
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "channelSettings") {
-      await ctx.scene
-          .enter("channelSettings")
-          .catch((e) => console.log(e.message));
+        await ctx.scene
+            .enter("channelSettings")
+            .catch((e) => console.log(e.message));
     }
   } catch (e) {
     console.log(e.message);
