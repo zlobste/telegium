@@ -16,10 +16,10 @@ viewPost.enter(async (ctx) => {
       });
 
       if (post) {
-        await ctx.tg.deleteMessage(
-            ctx.update.callback_query.message.chat.id,
-            ctx.update.callback_query.message.message_id
-        );
+          await ctx.tg.deleteMessage(
+              ctx.update.callback_query.message.chat.id,
+              ctx.update.callback_query.message.message_id
+          );
 
           const resp = await ctx.tg.forwardMessage(
               `-100${process.env.STORAGE}`,

@@ -22,11 +22,13 @@ viewChannel.enter(async (ctx) => {
         await ctx.editMessageText(
             `ID: ${info.id}\nTitle: ${info.title}\nDescription: ${
                 info.description || "-"
-            }\nCategory: ${channel.category}\nMembers count: ${countOfMembers}\nAutoposting: ${channel.autoposting}\nPost price: ${channel.price}\nTime of active post: ${
+            }\nCategory: ${
+                channel.category
+            }\nMembers count: ${countOfMembers}\nAutoposting: ${
+                channel.autoposting
+            }\nPost price: ${channel.price}\nTime of active post: ${
                 channel.timeOfActivePost.split(":")[0]
-            } часов ${
-                channel.timeOfActivePost.split(":")[1]
-            } минут`,
+            } часов ${channel.timeOfActivePost.split(":")[1]} минут`,
             Extra.markdown().markup((m) =>
                 m.inlineKeyboard([
                   [

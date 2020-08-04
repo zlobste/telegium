@@ -21,9 +21,9 @@ const schema = new Schema({
     required: true,
   },
   category: {
-    type: String,
-    required: false
-    //required: true,
+      type: String,
+      required: false,
+      //required: true,
   },
   timeOfActivePost: {
     type: String,

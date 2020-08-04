@@ -62,24 +62,24 @@ const getUserInfo = async (ctx, userId) => {
             candidate = newUser;
         }
 
-    return {
-      text: `**User info**\nuserID: ${candidate.telegramId}\nbalance: ${candidate.balance}`,
-      markup: Extra.HTML().markup((m) =>
-          m.inlineKeyboard([
-              [m.callbackButton("All channels", "All channels")],
-              [
-                  m.callbackButton("User posts", "userPosts"),
-                  m.callbackButton("User channels", "userChannels"),
-              ],
-              [
-                  m.callbackButton("Notifications", "Notifications"),
-                  m.callbackButton("Basket", "Basket"),
-              ],
-              [
-                  m.callbackButton("Put money", "Put money"),
-                  m.callbackButton("Get money", "Get money"),
-              ],
-          ])
+        return {
+            text: `**User info**\nuserID: ${candidate.telegramId}\nbalance: ${candidate.balance}`,
+            markup: Extra.HTML().markup((m) =>
+                m.inlineKeyboard([
+                    [m.callbackButton("All channels", "All channels")],
+                    [
+                        m.callbackButton("User posts", "userPosts"),
+                        m.callbackButton("User channels", "userChannels"),
+                    ],
+                    [
+                        m.callbackButton("Notifications", "Notifications"),
+                        m.callbackButton("Basket", "Basket"),
+                    ],
+                    [
+                        m.callbackButton("Put money", "Put money"),
+                        m.callbackButton("Get money", "Get money"),
+                    ],
+                ])
       ),
     };
   } catch (e) {

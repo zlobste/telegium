@@ -24,11 +24,11 @@ addName.action("back", async (ctx) => {
 
 addName.on("message", async (ctx) => {
   try {
-    let post = await Post.findOne({
-      userId: ctx.update.message.chat.id,
-    })
-        .sort({_id: -1})
-        .limit(1);
+      let post = await Post.findOne({
+          userId: ctx.update.message.chat.id,
+      })
+          .sort({_id: -1})
+          .limit(1);
 
     if (!post || post.completed) {
       const newPost = new Post({
@@ -43,14 +43,14 @@ addName.on("message", async (ctx) => {
       await post.save();
     }
 
-    await ctx.tg
-        .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
-        .catch((e) => {
-          console.log(e.message);
-          console.log(
-              `error deleteMessage, message id: ${ctx.update.message.message_id}, chat id: ${ctx.chat.id}`
-          );
-        });
+      await ctx.tg
+          .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
+          .catch((e) => {
+              console.log(e.message);
+              console.log(
+                  `error deleteMessage, message id: ${ctx.update.message.message_id}, chat id: ${ctx.chat.id}`
+              );
+          });
 
     /*await ctx.tg.deleteMessage(
             ctx.chat.id,
