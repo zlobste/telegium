@@ -48,6 +48,10 @@ main.action("userPosts", async (ctx) => {
     await ctx.scene.enter("userPosts").catch((e) => console.log(e.message));
 });
 
+main.action("catalog", async (ctx) => {
+    await ctx.scene.enter("catalog").catch((e) => console.log(e.message));
+});
+
 const getUserInfo = async (ctx, userId) => {
     try {
         let candidate = await User.findOne({
@@ -66,7 +70,7 @@ const getUserInfo = async (ctx, userId) => {
             text: `**User info**\nuserID: ${candidate.telegramId}\nbalance: ${candidate.balance}`,
             markup: Extra.HTML().markup((m) =>
                 m.inlineKeyboard([
-                    [m.callbackButton("All channels", "All channels")],
+                    [m.callbackButton("All channels", "catalog")],
                     [
                         m.callbackButton("User posts", "userPosts"),
                         m.callbackButton("User channels", "userChannels"),

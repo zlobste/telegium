@@ -20,6 +20,7 @@ const changeCategory = require("./src/scenes/channels/settings/changeCategory");
 const setCategory = require("./src/scenes/channels/addition/setCategory");
 const setPrice = require("./src/scenes/channels/addition/setPrice");
 const setPostTime = require("./src/scenes/channels/addition/setPostTime");
+const catalog = require('./src/scenes/catalog/catalog')
 
 const mtproto = require("./mtproto");
 
@@ -51,7 +52,8 @@ async function start() {
     stage.register(changeCategory);
     stage.register(setCategory);
     stage.register(setPrice);
-    stage.register(setPostTime);
+      stage.register(setPostTime);
+      stage.register(catalog);
 
     /*stage.register([
             main,

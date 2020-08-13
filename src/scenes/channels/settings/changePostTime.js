@@ -104,13 +104,11 @@ changePostTime.start(async (ctx) => {
 
 changePostTime.on("message", async (ctx) => {
   try {
-    console.log("time input: ", ctx.update.message.text);
 
     let time = ctx.update.message.text;
 
-    console.log("time convert: ", time);
 
-    if (time) {
+      if (time) {
       time = time.split(":");
       if (time.length > 0 && time.length < 3) {
         let hours = "00";
