@@ -232,10 +232,7 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
     let filterCategories = "Bсе";
     if (filter.categories.length > 0) {
       filterCategories = filter.categories.join(", ");
-      filterCategories = filterCategories.substr(
-          0,
-          filterCategories.length - 2
-      );
+
     }
 
     let sorting = "";

@@ -9,9 +9,7 @@ changeCatalogCategory.enter(async (ctx) => {
     try {
         await ctx.answerCbQuery();
 
-        const data = JSON.parse(ctx.update.callback_query.data);
-
-        const categories = await getCategories(data.id);
+        const categories = await getCategories(ctx.update.callback_query.message.chat.id);
         if (categories) {
             await ctx.editMessageText(categories.text, categories.markup);
         } else {
@@ -26,11 +24,10 @@ changeCatalogCategory.on("callback_query", async (ctx) => {
     try {
         await ctx.answerCbQuery();
         const data = JSON.parse(ctx.update.callback_query.data);
+        data.id = ctx.update.callback_query.message.chat.id;
 
         if (data.action === "back") {
-            await ctx.scene
-                .enter("catalog")
-                .catch((e) => console.log(e.message));
+            await ctx.scene.enter("catalog").catch((e) => console.log(e.message));
         } else if (data.action === "next") {
             const keyboard = await getCategories(data.id, data.skip + data.limit);
 
@@ -42,10 +39,20 @@ changeCatalogCategory.on("callback_query", async (ctx) => {
 
             await ctx.editMessageText(keyboard.text, keyboard.markup);
         } else {
+
+            //logic
             if (data.n) {
-                const channel = await Channel.findOne({telegramId: data.id});
-                channel.category = data.n;
-                await channel.save();
+
+                const filter = await Filter.findOne({
+                    userId: data.id,
+                });
+
+                if (filter.categories.indexOf(data.n) === -1) {
+                    filter.categories.push(data.n);
+                } else {
+                    filter.categories = filter.categories.filter(x => x !== data.n);
+                }
+                await filter.save();
 
                 const keyboard = await getCategories(data.id, data.s);
 
@@ -59,108 +66,85 @@ changeCatalogCategory.on("callback_query", async (ctx) => {
     }
 });
 
-const getCategories = async (id, skip = 0, limit = 5) => {
+const getCategories = async (userId, skip = 0, limit = 5) => {
     try {
 
-        const channel = await Filter.findOne({
-            telegramId: id,
+        let filter = await Filter.findOne({
+            userId: userId,
         });
-        if (channel) {
 
-            let filter = await Filter.findOne({
-                userId: channel.userId,
+        if (!filter) {
+            filter = new Filter({
+                userId: userId,
             });
 
-            if (!filter) {
+            filter.save();
+        }
 
-                filter = new Filter({
-                    userId: channel.userId,
-                });
+        let categories = await Category.find().skip(skip).limit(limit);
 
-                filter.save();
+        if (categories.length === 0) {
+            return null;
+        }
+
+        categories = categories.map((x) => {
+
+            let title = x.name;
+            if (filter.categories.indexOf(x.name) !== -1) {
+                title = "☑️ " + title;
             }
 
-
-            let categories = await Category.find().skip(skip).limit(limit);
-
-            if (categories.length === 0) {
-                return null;
-            }
-
-            categories = categories.map((x) => [
+            return [
                 Markup.callbackButton(
-                    x.name,
+                    title,
                     JSON.stringify({
                         n: x.name,
-                        id: id,
                         l: limit,
                         s: skip,
                     })
                 ),
-            ]);
-
-            const keyboard = [
-                ...categories,
-                [
-                    Markup.callbackButton(
-                        "Previous",
-                        JSON.stringify({
-                            action: "previous",
-                            limit: limit,
-                            skip: skip,
-                            id: id,
-                        })
-                    ),
-                    Markup.callbackButton(
-                        "Next",
-                        JSON.stringify({
-                            action: "next",
-                            limit: limit,
-                            skip: skip,
-                            id: id,
-                        })
-                    ),
-                ],
-                [
-                    Markup.callbackButton(
-                        "Back",
-                        JSON.stringify({
-                            action: "back",
-                            id: id,
-                        })
-                    ),
-                ],
             ];
+        })
 
+        const keyboard = [
+            ...categories,
+            [
+                Markup.callbackButton(
+                    "Previous",
+                    JSON.stringify({
+                        action: "previous",
+                        limit: limit,
+                        skip: skip,
+                    })
+                ),
+                Markup.callbackButton(
+                    "Next",
+                    JSON.stringify({
+                        action: "next",
+                        limit: limit,
+                        skip: skip,
+                    })
+                ),
+            ],
+            [
+                Markup.callbackButton(
+                    "Back",
+                    JSON.stringify({
+                        action: "back",
+                    })
+                ),
+            ],
+        ];
 
-            let category = 'Bсе';
-            if (filter.categories.length > 0) {
-                category = filter.categories.join(", ");
-                category = category.substr(0, category.length - 2);
-            }
-
-            let sorting = "";
-            if (filter.sort.byCostIncrease) {
-                sorting = "По увеличению цены";
-            } else if (filter.sort.byCostDecrease) {
-                sorting = "По уменьшению цены";
-            } else if (filter.sort.byMembersIncrease) {
-                sorting = "По увеличению подписчиков";
-            } else if (filter.sort.byMembersDecrease) {
-                sorting = "По уменьшению подписчиков";
-            } else {
-                return null;
-            }
-
-            return {
-                text: `Категории:\n${category}\n\nИнтервал:\nЦена поста: ${filter.interval.cost.start} - ${filter.interval.cost.finish} ₽\nПодписчики: ${filter.interval.members.start} - ${filter.interval.members.finish}\n\nСортировка: ${sorting}`,
-                markup: Extra.markdown().markup((m) => m.inlineKeyboard(keyboard)),
-            };
-
-
-        } else {
-            return null;
+        let category = "Bсе";
+        if (filter.categories.length > 0) {
+            category = filter.categories.join(", ");
         }
+
+        return {
+            text: `Категории:\n${category}`,
+            markup: Extra.markdown().markup((m) => m.inlineKeyboard(keyboard)),
+        };
 
 
     } catch (e) {
