@@ -2,6 +2,7 @@ const {Extra} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
 const Channel = require("../../models/Channel");
+const Filter = require("../../models/Filter");
 const catalog = new Scene("catalog");
 
 catalog.enter(async (ctx) => {
@@ -19,9 +20,18 @@ catalog.enter(async (ctx) => {
     if (!keyboard) {
       keyboard = {
         text:
-            "Пока в системе 0 каналов. Добавьте свой канал чтобы стать первым!",
+            "По вашему фильтру не найдено ни одного канала!",
         markup: Extra.markdown().markup((m) =>
-            m.inlineKeyboard([[Markup.callbackButton("Back", "back")]])
+            m.inlineKeyboard([
+              [
+                Markup.callbackButton("Category", "category"),
+                Markup.callbackButton("Interval", "interval"),
+                Markup.callbackButton("Sort", "sort"),
+              ],
+              [
+                Markup.callbackButton("Back", "back")
+              ],
+            ])
         ),
       };
     }
@@ -101,12 +111,118 @@ catalog.on("callback_query", async (ctx) => {
 
 const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
   try {
+
+
+    let filter = await Filter.findOne({
+      userId: userId,
+    });
+
+
+    if (!filter) {
+
+      filter = new Filter({
+        userId: userId,
+      });
+
+      await filter.save();
+    }
+
+
     let channels = await Channel.find({
       changeCompleted: true,
       additionCompleted: true,
     })
-        .skip(skip)
-        .limit(limit);
+
+
+    for (let i = 0; i < channels.length; i++) {
+
+      const countOfMembers = await ctx.tg.getChatMembersCount(channels[i].telegramId);
+      channels[i].countOfMembers = countOfMembers;
+
+    }
+    /*channels.forEach( x => {
+      ctx.tg.getChatMembersCount(x.telegramId)
+          .then( data => {
+              x.countOfMembers = data;
+          })
+          .catch( e => console.log(e.message))
+    })*/
+
+
+    console.log(channels)
+    channels = channels.filter(x => {
+
+      if (filter.categories.length === 0) {
+
+        if (
+            x.price >= filter.interval.cost.start &&
+            x.price <= filter.interval.cost.finish &&
+            x.countOfMembers >= filter.interval.members.start &&
+            x.countOfMembers <= filter.interval.members.finish
+        ) {
+
+          return true;
+        }
+        return false;
+      } else {
+        if (
+            filter.categories.indexOf(x.category) !== -1 &&
+            x.price >= filter.interval.cost.start &&
+            x.price <= filter.interval.cost.finish &&
+            x.countOfMembers >= filter.interval.members.start &&
+            x.countOfMembers <= filter.interval.members.finish
+        ) {
+
+          return true;
+        }
+        return false;
+      }
+
+
+    })
+
+
+    channels.sort((a, b) => {
+
+      if (filter.sort.byCostIncrease) {
+
+        if (a.price > b.price) {
+          return 1;
+        } else if (b.price > a.price) {
+          return -1;
+        }
+        return 0;
+
+      } else if (filter.sort.byCostDecrease) {
+
+        if (a.price < b.price) {
+          return 1;
+        } else if (b.price < a.price) {
+          return -1;
+        }
+        return 0;
+
+      } else if (filter.sort.byMembersIncrease) {
+
+        if (a.countOfMembers > b.countOfMembers) {
+          return 1;
+        } else if (b.countOfMembers > a.countOfMembers) {
+          return -1;
+        }
+        return 0;
+
+      } else if (filter.sort.byMembersDecrease) {
+
+        if (a.countOfMembers < b.countOfMembers) {
+          return 1;
+        } else if (b.countOfMembers < a.countOfMembers) {
+          return -1;
+        }
+        return 0;
+      }
+    })
+
+    channels = channels.slice(skip, limit);
 
     if (channels.length === 0) {
       return null;
@@ -157,12 +273,33 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
       [Markup.callbackButton("Back", "back")],
     ];
 
+    let filterCategories = 'Bсе';
+    if (filter.categories.length > 0) {
+      filterCategories = filter.categories.join(", ");
+      filterCategories = filterCategories.substr(0, filterCategories.length - 2);
+    }
+
+    let sorting = "";
+    if (filter.sort.byCostIncrease) {
+      sorting = "По увеличению цены";
+    } else if (filter.sort.byCostDecrease) {
+      sorting = "По уменьшению цены";
+    } else if (filter.sort.byMembersIncrease) {
+      sorting = "По увеличению подписчиков";
+    } else if (filter.sort.byMembersDecrease) {
+      sorting = "По уменьшению подписчиков";
+    } else {
+      return null;
+    }
+
     return {
-      text: "Каталог Каналов",
+      text: `Категории:\n${filterCategories}\n\nИнтервал:\nЦена поста: ${filter.interval.cost.start} - ${filter.interval.cost.finish} ₽\nПодписчики: ${filter.interval.members.start} - ${filter.interval.members.finish}\n\nСортировка: ${sorting}`,
       markup: Extra.markdown().markup((m) => m.inlineKeyboard(keyboard)),
     };
+
+
   } catch (e) {
-    console.log(e.message);
+    console.log(e);
   }
 };
 

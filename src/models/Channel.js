@@ -7,7 +7,6 @@ const schema = new Schema({
   },
   userId: {
     type: String,
-    ref: "User",
     required: true,
   },
   rating: {

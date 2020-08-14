@@ -20,65 +20,68 @@ const changeCategory = require("./src/scenes/channels/settings/changeCategory");
 const setCategory = require("./src/scenes/channels/addition/setCategory");
 const setPrice = require("./src/scenes/channels/addition/setPrice");
 const setPostTime = require("./src/scenes/channels/addition/setPostTime");
-const catalog = require('./src/scenes/catalog/catalog')
+const catalog = require('./src/scenes/catalog/catalog');
+const changeCatalogCategory = require('./src/scenes/catalog/settings/changeCatalogCategory');
 
 const mtproto = require("./mtproto");
 
 async function start() {
-  try {
-    mongoose.connect(process.env.DB_LINK, {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-      useCreateIndex: true,
-    });
+    try {
+        mongoose.connect(process.env.DB_LINK, {
+            useUnifiedTopology: true,
+            useNewUrlParser: true,
+            useCreateIndex: true,
+        });
 
-    const bot = new Telegraf(process.env.BOT_TOKEN);
+        const bot = new Telegraf(process.env.BOT_TOKEN);
 
-    const stage = new Stage();
+        const stage = new Stage();
 
-    stage.register(main);
-    stage.register(userPosts);
-    stage.register(editPost);
-    stage.register(addName);
-    stage.register(addPost);
-    stage.register(viewPost);
-    stage.register(userChannels);
-    stage.register(addChannel);
-    stage.register(viewChannel);
-    stage.register(channelSettings);
-    stage.register(changePrice);
-    stage.register(changeAutoposting);
-    stage.register(changePostTime);
-    stage.register(changeCategory);
-    stage.register(setCategory);
-    stage.register(setPrice);
-      stage.register(setPostTime);
-      stage.register(catalog);
+        stage.register(main);
+        stage.register(userPosts);
+        stage.register(editPost);
+        stage.register(addName);
+        stage.register(addPost);
+        stage.register(viewPost);
+        stage.register(userChannels);
+        stage.register(addChannel);
+        stage.register(viewChannel);
+        stage.register(channelSettings);
+        stage.register(changePrice);
+        stage.register(changeAutoposting);
+        stage.register(changePostTime);
+        stage.register(changeCategory);
+        stage.register(setCategory);
+        stage.register(setPrice);
+        stage.register(setPostTime);
+        stage.register(catalog);
+        stage.register(changeCatalogCategory);
 
-    /*stage.register([
-            main,
-            userPosts,
-            editPost,
-            addName,
-            addPost,
-            viewPost,
-            userChannels,
-            addChannel,
-            viewChannel,
-            channelSettings,
-            changePrice,
-            changeAutoposting
-        ])*/
 
-    bot.use(session());
-    bot.use(stage.middleware());
+        /*stage.register([
+                main,
+                userPosts,
+                editPost,
+                addName,
+                addPost,
+                viewPost,
+                userChannels,
+                addChannel,
+                viewChannel,
+                channelSettings,
+                changePrice,
+                changeAutoposting
+            ])*/
 
-    bot.start(async (ctx) => {
-      await ctx.scene.enter("main");
-    });
+        bot.use(session());
+        bot.use(stage.middleware());
 
-    bot.catch((err, ctx) => {
-      console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
+        bot.start(async (ctx) => {
+            await ctx.scene.enter("main");
+        });
+
+        bot.catch((err, ctx) => {
+            console.log(`Ooops, encountered an error for ${ctx.updateType}`, err);
     });
 
     bot.launch();
