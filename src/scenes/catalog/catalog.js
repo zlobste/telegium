@@ -7,20 +7,13 @@ const catalog = new Scene("catalog");
 
 catalog.enter(async (ctx) => {
   try {
-    let keyboard;
-    if (ctx.update.callback_query) {
-      keyboard = await getChannels(
-          ctx,
-          ctx.update.callback_query.message.chat.id
-      );
-    } else {
-      keyboard = await getChannels(ctx, ctx.update.message.chat.id);
-    }
+
+    await ctx.answerCbQuery();
+    let keyboard = await getChannels(ctx, ctx.update.callback_query.message.chat.id);
 
     if (!keyboard) {
       keyboard = {
-        text:
-            "По вашему фильтру не найдено ни одного канала!",
+        text: "По вашему фильтру не найдено ни одного канала!",
         markup: Extra.markdown().markup((m) =>
             m.inlineKeyboard([
               [
@@ -28,24 +21,14 @@ catalog.enter(async (ctx) => {
                 Markup.callbackButton("Interval", "interval"),
                 Markup.callbackButton("Sort", "sort"),
               ],
-              [
-                Markup.callbackButton("Back", "back")
-              ],
+              [Markup.callbackButton("Back", "back")],
             ])
         ),
       };
     }
 
-    if (
-        ctx.update.callback_query &&
-        (ctx.update.callback_query.data === "catalog" ||
-            ctx.update.callback_query.data === "back")
-    ) {
-      await ctx.answerCbQuery();
-      await ctx.editMessageText(keyboard.text, keyboard.markup);
-    } else {
-      await ctx.reply(keyboard.text, keyboard.markup);
-    }
+    await ctx.editMessageText(keyboard.text, keyboard.markup);
+
   } catch (e) {
     console.log(e.message);
   }
@@ -66,15 +49,21 @@ catalog.action("back", async (ctx) => {
 });
 
 catalog.action("sort", async (ctx) => {
-  await ctx.scene.enter("changeCatalogSort").catch((e) => console.log(e.message));
+  await ctx.scene
+      .enter("changeCatalogSort")
+      .catch((e) => console.log(e.message));
 });
 
 catalog.action("interval", async (ctx) => {
-  await ctx.scene.enter("changeCatalogInterval").catch((e) => console.log(e.message));
+  await ctx.scene
+      .enter("changeCatalogInterval")
+      .catch((e) => console.log(e.message));
 });
 
 catalog.action("category", async (ctx) => {
-  await ctx.scene.enter("changeCatalogCategory").catch((e) => console.log(e.message));
+  await ctx.scene
+      .enter("changeCatalogCategory")
+      .catch((e) => console.log(e.message));
 });
 
 catalog.on("callback_query", async (ctx) => {
@@ -111,15 +100,11 @@ catalog.on("callback_query", async (ctx) => {
 
 const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
   try {
-
-
     let filter = await Filter.findOne({
       userId: userId,
     });
 
-
     if (!filter) {
-
       filter = new Filter({
         userId: userId,
       });
@@ -127,40 +112,23 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
       await filter.save();
     }
 
-
     let channels = await Channel.find({
       changeCompleted: true,
       additionCompleted: true,
-    })
+    });
 
-
-    for (let i = 0; i < channels.length; i++) {
-
-      const countOfMembers = await ctx.tg.getChatMembersCount(channels[i].telegramId);
-      channels[i].countOfMembers = countOfMembers;
-
+    for (const chan of channels) {
+      chan.countOfMembers = await ctx.tg.getChatMembersCount(chan.telegramId);
     }
-    /*channels.forEach( x => {
-      ctx.tg.getChatMembersCount(x.telegramId)
-          .then( data => {
-              x.countOfMembers = data;
-          })
-          .catch( e => console.log(e.message))
-    })*/
 
-
-    console.log(channels)
-    channels = channels.filter(x => {
-
+    channels = channels.filter((x) => {
       if (filter.categories.length === 0) {
-
         if (
             x.price >= filter.interval.cost.start &&
             x.price <= filter.interval.cost.finish &&
             x.countOfMembers >= filter.interval.members.start &&
             x.countOfMembers <= filter.interval.members.finish
         ) {
-
           return true;
         }
         return false;
@@ -172,47 +140,35 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
             x.countOfMembers >= filter.interval.members.start &&
             x.countOfMembers <= filter.interval.members.finish
         ) {
-
           return true;
         }
         return false;
       }
-
-
-    })
-
+    });
 
     channels.sort((a, b) => {
-
       if (filter.sort.byCostIncrease) {
-
         if (a.price > b.price) {
           return 1;
         } else if (b.price > a.price) {
           return -1;
         }
         return 0;
-
       } else if (filter.sort.byCostDecrease) {
-
         if (a.price < b.price) {
           return 1;
         } else if (b.price < a.price) {
           return -1;
         }
         return 0;
-
       } else if (filter.sort.byMembersIncrease) {
-
         if (a.countOfMembers > b.countOfMembers) {
           return 1;
         } else if (b.countOfMembers > a.countOfMembers) {
           return -1;
         }
         return 0;
-
       } else if (filter.sort.byMembersDecrease) {
-
         if (a.countOfMembers < b.countOfMembers) {
           return 1;
         } else if (b.countOfMembers < a.countOfMembers) {
@@ -220,7 +176,7 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
         }
         return 0;
       }
-    })
+    });
 
     channels = channels.slice(skip, limit);
 
@@ -273,10 +229,13 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
       [Markup.callbackButton("Back", "back")],
     ];
 
-    let filterCategories = 'Bсе';
+    let filterCategories = "Bсе";
     if (filter.categories.length > 0) {
       filterCategories = filter.categories.join(", ");
-      filterCategories = filterCategories.substr(0, filterCategories.length - 2);
+      filterCategories = filterCategories.substr(
+          0,
+          filterCategories.length - 2
+      );
     }
 
     let sorting = "";
@@ -296,8 +255,6 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
       text: `Категории:\n${filterCategories}\n\nИнтервал:\nЦена поста: ${filter.interval.cost.start} - ${filter.interval.cost.finish} ₽\nПодписчики: ${filter.interval.members.start} - ${filter.interval.members.finish}\n\nСортировка: ${sorting}`,
       markup: Extra.markdown().markup((m) => m.inlineKeyboard(keyboard)),
     };
-
-
   } catch (e) {
     console.log(e);
   }
