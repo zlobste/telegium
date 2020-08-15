@@ -7,7 +7,6 @@ const catalog = new Scene("catalog");
 
 catalog.enter(async (ctx) => {
   try {
-
     await ctx.answerCbQuery();
     let keyboard = await getChannels(ctx, ctx.update.callback_query.message.chat.id);
 
@@ -143,14 +142,12 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
               x.price <= filter.interval.cost.finish &&
               x.countOfMembers >= filter.interval.members.start &&
               x.countOfMembers <= filter.interval.members.finish;
-
       } else {
           return filter.categories.indexOf(x.category) !== -1 &&
               x.price >= filter.interval.cost.start &&
               x.price <= filter.interval.cost.finish &&
               x.countOfMembers >= filter.interval.members.start &&
               x.countOfMembers <= filter.interval.members.finish;
-
       }
     });
 

@@ -87,13 +87,7 @@ changeCatalogSort.on("callback_query", async (ctx) => {
         const action = ctx.update.callback_query.data;
 
         if (action === "back") {
-
-            try {
-                await ctx.scene.enter("catalog");
-            } catch (e) {
-                console.log(e.message);
-            }
-
+            await ctx.scene.enter("catalog");
         } else {
 
             let filter = await Filter.findOne({

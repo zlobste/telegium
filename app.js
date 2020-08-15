@@ -23,6 +23,9 @@ const setPostTime = require("./src/scenes/channels/addition/setPostTime");
 const catalog = require('./src/scenes/catalog/catalog');
 const changeCatalogCategory = require('./src/scenes/catalog/settings/changeCatalogCategory');
 const changeCatalogSort = require('./src/scenes/catalog/settings/changeCatalogSort');
+const changeCatalogInterval = require('./src/scenes/catalog/settings/changeCatalogInterval');
+const changeMembersCountInterval = require('./src/scenes/catalog/settings/changeMembersCountInterval');
+const changePostCostInterval = require('./src/scenes/catalog/settings/changePostCostInterval');
 
 
 //const mtproto = require("./mtproto");
@@ -59,6 +62,10 @@ async function start() {
         stage.register(catalog);
         stage.register(changeCatalogCategory);
         stage.register(changeCatalogSort);
+        stage.register(changeCatalogInterval);
+        stage.register(changeMembersCountInterval);
+        stage.register(changePostCostInterval);
+
 
         /*stage.register([
                 main,

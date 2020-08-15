@@ -118,12 +118,7 @@ setPostTime.on("message", async (ctx) => {
           channel.timeOfActivePost = time;
           await channel.save();
 
-          try {
-              await ctx.scene.enter("setPostTime");
-          } catch (e) {
-              console.log(e.message);
-          }
-
+          await ctx.scene.enter("setPostTime");
       }
     } else {
       return await ctx.reply("Неправильный формат вода!");
