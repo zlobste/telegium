@@ -1,4 +1,3 @@
-const Markup = require("telegraf/markup");
 const {Extra} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
 const changePrice = new Scene("changePrice");
@@ -81,17 +80,22 @@ changePrice.enter(async (ctx) => {
 });
 
 changePrice.start(async (ctx) => {
-  let channel = await Channel.findOne({
-    userId: ctx.update.message.from.id,
-    changeCompleted: false,
-  });
 
-  if (channel) {
-    channel.changeCompleted = true;
-    await channel.save();
+  try {
+    let channel = await Channel.findOne({
+      userId: ctx.update.message.from.id,
+      changeCompleted: false,
+    });
+
+    if (channel) {
+      channel.changeCompleted = true;
+      await channel.save();
+    }
+
+    await ctx.scene.enter("main");
+  } catch (e) {
+    console.log(e.message);
   }
-
-  await ctx.scene.enter("main").catch((e) => console.log(e.message));
 });
 
 changePrice.on("message", async (ctx) => {
@@ -109,9 +113,7 @@ changePrice.on("message", async (ctx) => {
         channel.price = price;
         await channel.save();
 
-        await ctx.scene
-            .enter("changePrice")
-            .catch((e) => console.log(e.message));
+        await ctx.scene.enter("changePrice");
       }
     } else {
       return await ctx.reply("Неправильный формат вода!");
@@ -130,9 +132,7 @@ changePrice.on("callback_query", async (ctx) => {
       channel.changeCompleted = true;
       await channel.save();
 
-      await ctx.scene
-          .enter("channelSettings")
-          .catch((e) => console.log(e.message));
+      await ctx.scene.enter("channelSettings");
     }
   } catch (e) {
     console.log(e.message);

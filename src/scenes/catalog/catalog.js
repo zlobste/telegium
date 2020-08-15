@@ -35,35 +35,51 @@ catalog.enter(async (ctx) => {
 });
 
 catalog.start(async (ctx) => {
-  await ctx.scene.enter("main").catch((e) => console.log(e.message));
+    try {
+        await ctx.scene.enter("main");
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 catalog.on("message", async (ctx) => {
-  await ctx.tg
-      .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
-      .catch((e) => console.log(e.message));
+    try {
+        await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id);
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 catalog.action("back", async (ctx) => {
-  await ctx.scene.enter("main", ctx.state).catch((e) => console.log(e.message));
+    try {
+        await ctx.scene.enter("main", ctx.state);
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 catalog.action("sort", async (ctx) => {
-  await ctx.scene
-      .enter("changeCatalogSort")
-      .catch((e) => console.log(e.message));
+    try {
+        await ctx.scene.enter("changeCatalogSort");
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 catalog.action("interval", async (ctx) => {
-  await ctx.scene
-      .enter("changeCatalogInterval")
-      .catch((e) => console.log(e.message));
+    try {
+        await ctx.scene.enter("changeCatalogInterval");
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 catalog.action("category", async (ctx) => {
-  await ctx.scene
-      .enter("changeCatalogCategory")
-      .catch((e) => console.log(e.message));
+    try {
+        await ctx.scene.enter("changeCatalogCategory");
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 catalog.on("callback_query", async (ctx) => {
@@ -123,26 +139,18 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
 
     channels = channels.filter((x) => {
       if (filter.categories.length === 0) {
-        if (
-            x.price >= filter.interval.cost.start &&
-            x.price <= filter.interval.cost.finish &&
-            x.countOfMembers >= filter.interval.members.start &&
-            x.countOfMembers <= filter.interval.members.finish
-        ) {
-          return true;
-        }
-        return false;
+          return x.price >= filter.interval.cost.start &&
+              x.price <= filter.interval.cost.finish &&
+              x.countOfMembers >= filter.interval.members.start &&
+              x.countOfMembers <= filter.interval.members.finish;
+
       } else {
-        if (
-            filter.categories.indexOf(x.category) !== -1 &&
-            x.price >= filter.interval.cost.start &&
-            x.price <= filter.interval.cost.finish &&
-            x.countOfMembers >= filter.interval.members.start &&
-            x.countOfMembers <= filter.interval.members.finish
-        ) {
-          return true;
-        }
-        return false;
+          return filter.categories.indexOf(x.category) !== -1 &&
+              x.price >= filter.interval.cost.start &&
+              x.price <= filter.interval.cost.finish &&
+              x.countOfMembers >= filter.interval.members.start &&
+              x.countOfMembers <= filter.interval.members.finish;
+
       }
     });
 

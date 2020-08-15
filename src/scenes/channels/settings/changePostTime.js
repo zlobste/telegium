@@ -1,4 +1,3 @@
-const Markup = require("telegraf/markup");
 const {Extra} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
 const changePostTime = new Scene("changePostTime");
@@ -89,17 +88,23 @@ changePostTime.enter(async (ctx) => {
 });
 
 changePostTime.start(async (ctx) => {
-  let channel = await Channel.findOne({
-    userId: ctx.update.message.from.id,
-    changeCompleted: false,
-  });
+    try {
+        let channel = await Channel.findOne({
+            userId: ctx.update.message.from.id,
+            changeCompleted: false,
+        });
 
-  if (channel) {
-    channel.changeCompleted = true;
-    await channel.save();
-  }
+        if (channel) {
+            channel.changeCompleted = true;
+            await channel.save();
+        }
 
-  await ctx.scene.enter("main").catch((e) => console.log(e.message));
+        await ctx.scene.enter("main");
+
+    } catch (e) {
+        console.log(e.message);
+    }
+
 });
 
 changePostTime.on("message", async (ctx) => {
@@ -153,9 +158,7 @@ changePostTime.on("message", async (ctx) => {
           channel.timeOfActivePost = time;
           await channel.save();
 
-          await ctx.scene
-              .enter("changePostTime")
-              .catch((e) => console.log(e.message));
+          await ctx.scene.enter("changePostTime");
       }
     } else {
       return await ctx.reply("Неправильный формат вода!");
@@ -174,9 +177,7 @@ changePostTime.on("callback_query", async (ctx) => {
         channel.changeCompleted = true;
         await channel.save();
 
-        await ctx.scene
-            .enter("channelSettings")
-            .catch((e) => console.log(e.message));
+        await ctx.scene.enter("channelSettings");
     }
   } catch (e) {
     console.log(e.message);

@@ -1,4 +1,3 @@
-const Markup = require("telegraf/markup");
 const {Extra} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
 const setPrice = new Scene("setPrice");
@@ -91,6 +90,7 @@ setPrice.on("message", async (ctx) => {
     let price = Number(ctx.update.message.text);
 
     if (price) {
+
       price = Number(price.toFixed(2));
       let channel = await Channel.findOne({
         userId: ctx.update.message.chat.id,
@@ -98,10 +98,15 @@ setPrice.on("message", async (ctx) => {
       });
 
       if (channel) {
-        channel.price = price;
-        await channel.save();
+          channel.price = price;
+          await channel.save();
 
-        await ctx.scene.enter("setPrice").catch((e) => console.log(e.message));
+          try {
+              await ctx.scene.enter("setPrice");
+          } catch (e) {
+              console.log(e.message);
+          }
+
       }
     } else {
       return await ctx.reply("Неправильный формат вода!");
@@ -116,7 +121,7 @@ setPrice.on("callback_query", async (ctx) => {
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "nextStep") {
-      await ctx.scene.enter("setPostTime").catch((e) => console.log(e.message));
+        await ctx.scene.enter("setPrice");
     }
   } catch (e) {
     console.log(e.message);

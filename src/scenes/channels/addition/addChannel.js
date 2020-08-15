@@ -1,4 +1,3 @@
-const Markup = require("telegraf/markup");
 const {Extra} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
 const Channel = require("../../../models/Channel");
@@ -22,7 +21,11 @@ addChannel.enter(async (ctx) => {
 });
 
 addChannel.action("back", async (ctx) => {
-  await ctx.scene.enter("userChannels").catch((e) => console.log(e.message));
+    try {
+        await ctx.scene.enter("userChannels");
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 addChannel.on("message", async (ctx) => {
@@ -52,21 +55,19 @@ addChannel.on("message", async (ctx) => {
                 });
 
                 if (!candidate) {
-                  const newChannel = new Channel({
-                    telegramId: ctx.update.message.forward_from_chat.id,
-                    userId: ctx.update.message.from.id,
-                  });
+                    const newChannel = new Channel({
+                        telegramId: ctx.update.message.forward_from_chat.id,
+                        userId: ctx.update.message.from.id,
+                    });
 
-                  await newChannel.save();
-                  await ctx.tg.exportChatInviteLink(newChannel.telegramId);
+                    await newChannel.save();
+                    await ctx.tg.exportChatInviteLink(newChannel.telegramId);
 
-                  /*await ctx.scene
-                      .enter("userChannels")
-                      .catch((e) => console.log(e.message));*/
-
-                  await ctx.scene
-                      .enter("setCategory")
-                      .catch((e) => console.log(e.message));
+                    try {
+                        await ctx.scene.enter("setCategory");
+                    } catch (e) {
+                        console.log(e.message);
+                    }
                 } else {
                   return await ctx.reply("Вы уже добавили этот канал раньше");
                 }

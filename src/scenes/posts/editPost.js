@@ -30,12 +30,18 @@ editPost.enter(async (ctx) => {
   }
 });
 
+/*
 editPost.action("addButton", async (ctx) => {
 });
+*/
 
 editPost.on("message", async (ctx) => {
-  await ctx.answerCbQuery();
-  await ctx.reply("Пришлите пост");
+  try {
+    await ctx.answerCbQuery();
+    await ctx.reply("Пришлите пост");
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 module.exports = editPost;

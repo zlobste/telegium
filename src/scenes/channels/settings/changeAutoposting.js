@@ -11,9 +11,8 @@ changeAutoposting.enter(async (ctx) => {
       channel.autoposting = !channel.autoposting;
       await channel.save();
 
-      await ctx.scene
-          .enter("channelSettings")
-          .catch((e) => console.log(e.message));
+      await ctx.scene.enter("channelSettings");
+
   } catch (e) {
     console.log(e.message);
   }

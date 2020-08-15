@@ -57,7 +57,11 @@ viewChannel.enter(async (ctx) => {
 });
 
 viewChannel.action("back", async (ctx) => {
-  await ctx.scene.enter("userChannels").catch((e) => console.log(e.message));
+    try {
+        await ctx.scene.enter("userChannels");
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 viewChannel.on("callback_query", async (ctx) => {
@@ -65,9 +69,7 @@ viewChannel.on("callback_query", async (ctx) => {
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "channelSettings") {
-        await ctx.scene
-            .enter("channelSettings")
-            .catch((e) => console.log(e.message));
+        await ctx.scene.enter("channelSettings");
     }
   } catch (e) {
     console.log(e.message);

@@ -27,7 +27,13 @@ changeCatalogCategory.on("callback_query", async (ctx) => {
         data.id = ctx.update.callback_query.message.chat.id;
 
         if (data.action === "back") {
-            await ctx.scene.enter("catalog").catch((e) => console.log(e.message));
+
+            try {
+                await ctx.scene.enter("catalog");
+            } catch (e) {
+                console.log(e.message);
+            }
+
         } else if (data.action === "next") {
             const keyboard = await getCategories(data.id, data.skip + data.limit);
 
@@ -78,7 +84,7 @@ const getCategories = async (userId, skip = 0, limit = 5) => {
                 userId: userId,
             });
 
-            filter.save();
+            await filter.save();
         }
 
         let categories = await Category.find().skip(skip).limit(limit);

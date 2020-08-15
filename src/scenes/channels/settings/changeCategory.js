@@ -28,9 +28,7 @@ changeCategory.on("callback_query", async (ctx) => {
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "back") {
-      await ctx.scene
-          .enter("channelSettings")
-          .catch((e) => console.log(e.message));
+      await ctx.scene.enter("channelSettings");
     } else if (data.action === "next") {
       const keyboard = await getCategories(data.id, data.skip + data.limit);
 

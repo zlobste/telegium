@@ -1,4 +1,3 @@
-const Markup = require("telegraf/markup");
 const {Extra} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
 const addName = new Scene("addName");
@@ -43,26 +42,13 @@ addName.on("message", async (ctx) => {
           await post.save();
       }
 
-      await ctx.tg
-          .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
-          .catch((e) => {
-              console.log(e.message);
-              console.log(
-                  `error deleteMessage, message id: ${ctx.update.message.message_id}, chat id: ${ctx.chat.id}`
-              );
-          });
-
-      /*await ctx.tg.deleteMessage(
-              ctx.chat.id,
-              ctx.update.message.message_id -1
-          )
-              .then( () =>  console.log(`deleteMessage message id: ${ctx.update.message.message_id - 1}, chat id: ${ctx.chat.id}`))
-              .catch( e => {
-                  console.log(e.message)
-              console.log(`error deleteMessage - 1, message id: ${ctx.update.message.message_id -1}, chat id: ${ctx.chat.id}`)
-          })
-  */
-
+      try {
+          await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id);
+      } catch (e) {
+          console.log(
+              `error deleteMessage, message id: ${ctx.update.message.message_id}, chat id: ${ctx.chat.id}`
+          );
+      }
       await ctx.scene.enter("addPost");
   } catch (e) {
     console.log(e.message);

@@ -1,4 +1,3 @@
-const Markup = require("telegraf/markup");
 const {Extra} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
 const channelSettings = new Scene("channelSettings");
@@ -79,21 +78,15 @@ channelSettings.on("callback_query", async (ctx) => {
         const data = JSON.parse(ctx.update.callback_query.data);
 
         if (data.action === "back") {
-            await ctx.scene.enter("viewChannel").catch((e) => console.log(e.message));
+            await ctx.scene.enter("viewChannel");
         } else if (data.action === "changeAutoposting") {
-            await ctx.scene
-                .enter("changeAutoposting")
-                .catch((e) => console.log(e.message));
+            await ctx.scene.enter("changeAutoposting");
         } else if (data.action === "changePrice") {
-            await ctx.scene.enter("changePrice").catch((e) => console.log(e.message));
+            await ctx.scene.enter("changePrice");
         } else if (data.action === "changePostTime") {
-            await ctx.scene
-                .enter("changePostTime")
-                .catch((e) => console.log(e.message));
+            await ctx.scene.enter("changePostTime");
         } else if (data.action === "changeCategory") {
-            await ctx.scene
-                .enter("changeCategory")
-                .catch((e) => console.log(e.message));
+            await ctx.scene.enter("changeCategory");
         }
     } catch (e) {
         console.log(e.message);

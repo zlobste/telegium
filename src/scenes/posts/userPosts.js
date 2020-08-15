@@ -30,7 +30,7 @@ userPosts.enter(async (ctx) => {
           ctx.update.callback_query &&
           (ctx.update.callback_query.data === "confirm" ||
               ctx.update.callback_query.data === "back" ||
-              ctx.update.callback_query.data.indexOf("delete") != -1)
+              ctx.update.callback_query.data.indexOf("delete") !== -1)
       ) {
           await ctx.reply(keyboard.text, keyboard.markup);
       } else {
@@ -42,21 +42,35 @@ userPosts.enter(async (ctx) => {
 });
 
 userPosts.start(async (ctx) => {
-  await ctx.scene.enter("main").catch((e) => console.log(e.message));
+    try {
+        await ctx.scene.enter("main");
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 userPosts.on("message", async (ctx) => {
-    await ctx.tg
-        .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
-        .catch((e) => console.log(e.message));
+    try {
+        await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id);
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 userPosts.action("back", async (ctx) => {
-  await ctx.scene.enter("main", ctx.state).catch((e) => console.log(e.message));
+    try {
+        await ctx.scene.enter("main", ctx.state);
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 userPosts.action("addPost", async (ctx) => {
-  await ctx.scene.enter("addName").catch((e) => console.log(e.message));
+    try {
+        await ctx.scene.enter("addName");
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 userPosts.on("callback_query", async (ctx) => {

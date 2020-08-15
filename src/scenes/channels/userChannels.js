@@ -48,27 +48,40 @@ userChannels.enter(async (ctx) => {
 });
 
 userChannels.start(async (ctx) => {
-  await ctx.scene.enter("main").catch((e) => console.log(e.message));
+  try {
+    await ctx.scene.enter("main");
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 userChannels.on("message", async (ctx) => {
-  await ctx.tg
-      .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
-      .catch((e) => console.log(e.message));
+  try {
+    await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id);
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 userChannels.action("back", async (ctx) => {
-  await ctx.scene.enter("main", ctx.state).catch((e) => console.log(e.message));
+  try {
+    await ctx.scene.enter("main", ctx.state);
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 userChannels.action("addChannel", async (ctx) => {
-  await ctx.scene.enter("addChannel").catch((e) => console.log(e.message));
+  try {
+    await ctx.scene.enter("addChannel");
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 userChannels.on("callback_query", async (ctx) => {
   try {
     await ctx.answerCbQuery();
-
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "getChannel") {

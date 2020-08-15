@@ -1,4 +1,3 @@
-const Markup = require("telegraf/markup");
 const {Extra} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
 const setPostTime = new Scene("setPostTime");
@@ -116,12 +115,15 @@ setPostTime.on("message", async (ctx) => {
       });
 
       if (channel) {
-        channel.timeOfActivePost = time;
-        await channel.save();
+          channel.timeOfActivePost = time;
+          await channel.save();
 
-        await ctx.scene
-            .enter("setPostTime")
-            .catch((e) => console.log(e.message));
+          try {
+              await ctx.scene.enter("setPostTime");
+          } catch (e) {
+              console.log(e.message);
+          }
+
       }
     } else {
       return await ctx.reply("Неправильный формат вода!");
@@ -136,14 +138,17 @@ setPostTime.on("callback_query", async (ctx) => {
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "finish") {
-      const channel = await Channel.findOne({telegramId: data.id});
-      channel.additionCompleted = true;
-      await channel.save();
+        const channel = await Channel.findOne({telegramId: data.id});
+        channel.additionCompleted = true;
+        await channel.save();
 
-      await ctx.answerCbQuery();
-      await ctx.scene
-          .enter("userChannels")
-          .catch((e) => console.log(e.message));
+        await ctx.answerCbQuery();
+
+        try {
+            await ctx.scene.enter("userChannels");
+        } catch (e) {
+            console.log(e.message);
+        }
     }
   } catch (e) {
     console.log(e.message);

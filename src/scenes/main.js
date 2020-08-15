@@ -35,21 +35,37 @@ main.start(async (ctx) => {
 });
 
 main.on("message", async (ctx) => {
-    await ctx.tg
-        .deleteMessage(ctx.chat.id, ctx.update.message.message_id)
-        .catch((e) => console.log(e.message));
+    try {
+        await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id);
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 main.action("userChannels", async (ctx) => {
-    await ctx.scene.enter("userChannels").catch((e) => console.log(e.message));
+    try {
+        await ctx.scene.enter("userChannels");
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 main.action("userPosts", async (ctx) => {
-    await ctx.scene.enter("userPosts").catch((e) => console.log(e.message));
+    try {
+        await ctx.scene.enter("userPosts");
+    } catch (e) {
+        console.log(e.message);
+    }
 });
 
 main.action("catalog", async (ctx) => {
-    await ctx.scene.enter("catalog").catch((e) => console.log(e.message));
+
+    try {
+        await ctx.scene.enter("catalog");
+    } catch (e) {
+        console.log(e.message);
+    }
+
 });
 
 const getUserInfo = async (ctx, userId) => {
