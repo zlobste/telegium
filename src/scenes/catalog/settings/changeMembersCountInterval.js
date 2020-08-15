@@ -1,9 +1,9 @@
 const {Extra, Markup} = require("telegraf");
 const Scene = require("telegraf/scenes/base");
-const changePostCostInterval = new Scene("changePostCostInterval");
+const changeMembersCountInterval = new Scene("changeMembersCountInterval");
 const Filter = require("../../../models/Filter");
 
-changePostCostInterval.enter(async (ctx) => {
+changeMembersCountInterval.enter(async (ctx) => {
     try {
 
 
@@ -27,7 +27,7 @@ changePostCostInterval.enter(async (ctx) => {
             if (filter) {
 
                 await ctx.answerCbQuery();
-                await ctx.editMessageText(`Цена поста: ${filter.interval.cost.start} - ${filter.interval.cost.finish} ₽\n\nЧтобы изменить интервал пришлите новый в формате 500-1000`,
+                await ctx.editMessageText(`Количество подписчиков: ${filter.interval.members.start} - ${filter.interval.members.finish}\n\nЧтобы изменить интервал пришлите новый в формате 500-1000`,
                     Extra.markdown().markup((m) => m.inlineKeyboard(keyboard)));
             }
 
@@ -36,7 +36,7 @@ changePostCostInterval.enter(async (ctx) => {
 
             if (filter) {
 
-                await ctx.reply(`Цена поста: ${filter.interval.cost.start} - ${filter.interval.cost.finish} ₽\n\nЧтобы изменить интервал пришлите новый в формате 500-1000`,
+                await ctx.reply(`Количество подписчиков: ${filter.interval.members.start} - ${filter.interval.members.finish}\n\nЧтобы изменить интервал пришлите новый в формате 500-1000`,
                     Extra.markdown().markup((m) => m.inlineKeyboard(keyboard)));
             }
         }
@@ -47,7 +47,7 @@ changePostCostInterval.enter(async (ctx) => {
     }
 });
 
-changePostCostInterval.on("message", async (ctx) => {
+changeMembersCountInterval.on("message", async (ctx) => {
     try {
         let cost = ctx.update.message.text;
 
@@ -58,8 +58,8 @@ changePostCostInterval.on("message", async (ctx) => {
                 return await ctx.reply("Неправильный формат вода!");
             }
 
-            let start = Number(Number(cost[0]).toFixed(2));
-            let finish = Number(Number(cost[1]).toFixed(2));
+            let start = Math.round(Number(cost[0]));
+            let finish = Math.round(Number(cost[1]));
 
 
             if (start && finish) {
@@ -73,12 +73,12 @@ changePostCostInterval.on("message", async (ctx) => {
                 let filter = await Filter.findOne({userId: ctx.update.message.chat.id});
 
                 if (filter) {
-                    filter.interval.cost.start = start;
-                    filter.interval.cost.finish = finish;
+                    filter.interval.members.start = start;
+                    filter.interval.members.finish = finish;
                     await filter.save();
                 }
 
-                await ctx.scene.enter("changePostCostInterval");
+                await ctx.scene.enter("changeMembersCountInterval");
 
             } else {
                 return await ctx.reply("Неправильный формат вода!");
@@ -90,7 +90,7 @@ changePostCostInterval.on("message", async (ctx) => {
     }
 });
 
-changePostCostInterval.on("callback_query", async (ctx) => {
+changeMembersCountInterval.on("callback_query", async (ctx) => {
     try {
         const action = ctx.update.callback_query.data;
 
@@ -104,4 +104,4 @@ changePostCostInterval.on("callback_query", async (ctx) => {
     }
 });
 
-module.exports = changePostCostInterval;
+module.exports = changeMembersCountInterval;
