@@ -2,29 +2,33 @@ const {Schema, model} = require("mongoose");
 
 const schema = new Schema({
   channelId: {
-    type: Schema.Types.ObjectId,
-    ref: "Channel",
+    type: String,
     required: true,
+  },
+  userId: {
+    type: String,
+    required: true,
+  },
+  postId: {
+    type: String,
+    default: "",
   },
   cost: {
     type: Number,
-    default: 0,
-    required: true,
+    default: 100,
   },
   timePoint: {
-    type: Date,
-    required: true,
-  },
-  post: {
-    type: Schema.Types.ObjectId,
-    ref: "Post",
-    required: true,
+    type: String,
+    default: "12:00",
   },
   inBasket: {
     type: Boolean,
     default: false,
-    required: true,
   },
+  completed: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 module.exports = model("Order", schema);

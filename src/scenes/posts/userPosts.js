@@ -24,8 +24,6 @@ userPosts.enter(async (ctx) => {
       };
     }
 
-      //console.log(ctx.update)
-
       if (
           ctx.update.callback_query &&
           (ctx.update.callback_query.data === "confirm" ||

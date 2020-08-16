@@ -26,7 +26,8 @@ const changeCatalogSort = require('./src/scenes/catalog/settings/changeCatalogSo
 const changeCatalogInterval = require('./src/scenes/catalog/settings/changeCatalogInterval');
 const changeMembersCountInterval = require('./src/scenes/catalog/settings/changeMembersCountInterval');
 const changePostCostInterval = require('./src/scenes/catalog/settings/changePostCostInterval');
-
+const makeOrder = require('./src/scenes/catalog/makeOrder');
+const choosePostForOrder = require("./src/scenes/catalog/choosePostForOrder")
 
 //const mtproto = require("./mtproto");
 
@@ -65,6 +66,8 @@ async function start() {
         stage.register(changeCatalogInterval);
         stage.register(changeMembersCountInterval);
         stage.register(changePostCostInterval);
+        stage.register(makeOrder);
+        stage.register(choosePostForOrder);
 
 
         /*stage.register([

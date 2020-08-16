@@ -87,17 +87,17 @@ catalog.on("callback_query", async (ctx) => {
 
     const data = JSON.parse(ctx.update.callback_query.data);
 
-    if (data.action === "getChannel") {
-      await ctx.scene.enter("viewChannel");
+    if (data.action === "getChannelForOrder") {
+        await ctx.scene.enter("viewChannel");
     } else if (data.action === "next") {
-      const keyboard = await getChannels(
-          ctx,
-          ctx.update.callback_query.message.chat.id,
-          data.skip + data.limit
-      );
+        const keyboard = await getChannels(
+            ctx,
+            ctx.update.callback_query.message.chat.id,
+            data.skip + data.limit
+        );
 
-      if (keyboard) {
-        await ctx.editMessageText(keyboard.text, keyboard.markup);
+        if (keyboard) {
+            await ctx.editMessageText(keyboard.text, keyboard.markup);
       }
     } else if (data.action === "previous" && data.skip > 0) {
       const keyboard = await getChannels(
@@ -199,8 +199,8 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
         Markup.callbackButton(
             x.channelName,
             JSON.stringify({
-              action: "getChannel",
-              id: x.telegramId,
+                action: "getChannelForOrder",
+                id: x.telegramId,
             })
         ),
       ];

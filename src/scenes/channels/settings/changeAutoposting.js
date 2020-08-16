@@ -8,10 +8,12 @@ changeAutoposting.enter(async (ctx) => {
 
       let channel = await Channel.findOne({telegramId: data.id});
 
-      channel.autoposting = !channel.autoposting;
-      await channel.save();
+      if (channel) {
+          channel.autoposting = !channel.autoposting;
+          await channel.save();
 
-      await ctx.scene.enter("channelSettings");
+          await ctx.scene.enter("channelSettings");
+      }
 
   } catch (e) {
     console.log(e.message);
