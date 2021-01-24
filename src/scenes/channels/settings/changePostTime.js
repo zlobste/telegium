@@ -1,7 +1,8 @@
-const {Extra} = require("telegraf");
+const { Extra } = require("telegraf");
 const Scene = require("telegraf/scenes/base");
-const changePostTime = new Scene("changePostTime");
 const Channel = require("../../../models/Channel");
+
+const changePostTime = new Scene("changePostTime");
 
 changePostTime.enter(async (ctx) => {
   try {
@@ -13,9 +14,9 @@ changePostTime.enter(async (ctx) => {
     }
 
     if (data) {
-        channel = await Channel.findOne({telegramId: data.id});
-        channel.changeCompleted = false;
-        await channel.save();
+      channel = await Channel.findOne({ telegramId: data.id });
+      channel.changeCompleted = false;
+      await channel.save();
     } else {
       channel = await Channel.findOne({
         userId: ctx.update.message.from.id,
@@ -37,46 +38,46 @@ changePostTime.enter(async (ctx) => {
 
       if (data.action === "reply") {
         await ctx.reply(
-            `Канал: ${chatInfo.title}\nТекущее время жизни поста: ${
-                channel.timeOfActivePost.split(":")[0]
-            } часов ${
-                channel.timeOfActivePost.split(":")[1]
-            } минут\n\nПришлите новое время жизни рекламного поста на Вашем канале\nФормат: 3 (3 часа) или 3:30 (3 часа 30 минут)\n\nP.S. Минимальное евремя жизни поста - 1 час`,
-            Extra.HTML().markup((m) =>
-                m.inlineKeyboard([
-                    [
-                        m.callbackButton(
-                            "Back",
-                            JSON.stringify({
-                                action: "back",
-                                id: data.id,
-                            })
-                        ),
-                    ],
-                ])
-            )
+          `Канал: ${chatInfo.title}\nТекущее время жизни поста: ${
+            channel.timeOfActivePost.split(":")[0]
+          } часов ${
+            channel.timeOfActivePost.split(":")[1]
+          } минут\n\nПришлите новое время жизни рекламного поста на Вашем канале\nФормат: 3 (3 часа) или 3:30 (3 часа 30 минут)\n\nP.S. Минимальное евремя жизни поста - 1 час`,
+          Extra.HTML().markup((m) =>
+            m.inlineKeyboard([
+              [
+                m.callbackButton(
+                  "Back",
+                  JSON.stringify({
+                    action: "back",
+                    id: data.id,
+                  })
+                ),
+              ],
+            ])
+          )
         );
       } else {
         await ctx.answerCbQuery();
         await ctx.editMessageText(
-            `Канал: ${chatInfo.title}\nТекущее время жизни поста: ${
-                channel.timeOfActivePost.split(":")[0]
-            } часов ${
-                channel.timeOfActivePost.split(":")[1]
-            } минут\n\nПришлите новое время жизни рекламного поста на Вашем канале\nФормат: 3 (3 часа) или 3:30 (3 часа 30 минут)\n\nP.S. Минимальное евремя жизни поста - 1 час`,
-            Extra.HTML().markup((m) =>
-                m.inlineKeyboard([
-                    [
-                        m.callbackButton(
-                            "Back",
-                            JSON.stringify({
-                                action: "back",
-                                id: data.id,
-                            })
-                        ),
-                    ],
-                ])
-            )
+          `Канал: ${chatInfo.title}\nТекущее время жизни поста: ${
+            channel.timeOfActivePost.split(":")[0]
+          } часов ${
+            channel.timeOfActivePost.split(":")[1]
+          } минут\n\nПришлите новое время жизни рекламного поста на Вашем канале\nФормат: 3 (3 часа) или 3:30 (3 часа 30 минут)\n\nP.S. Минимальное евремя жизни поста - 1 час`,
+          Extra.HTML().markup((m) =>
+            m.inlineKeyboard([
+              [
+                m.callbackButton(
+                  "Back",
+                  JSON.stringify({
+                    action: "back",
+                    id: data.id,
+                  })
+                ),
+              ],
+            ])
+          )
         );
       }
     } else {
@@ -88,32 +89,28 @@ changePostTime.enter(async (ctx) => {
 });
 
 changePostTime.start(async (ctx) => {
-    try {
-        let channel = await Channel.findOne({
-            userId: ctx.update.message.from.id,
-            changeCompleted: false,
-        });
+  try {
+    let channel = await Channel.findOne({
+      userId: ctx.update.message.from.id,
+      changeCompleted: false,
+    });
 
-        if (channel) {
-            channel.changeCompleted = true;
-            await channel.save();
-        }
-
-        await ctx.scene.enter("main");
-
-    } catch (e) {
-        console.log(e.message);
+    if (channel) {
+      channel.changeCompleted = true;
+      await channel.save();
     }
 
+    await ctx.scene.enter("main");
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 changePostTime.on("message", async (ctx) => {
   try {
-
     let time = ctx.update.message.text;
 
-
-      if (time) {
+    if (time) {
       time = time.split(":");
       if (time.length > 0 && time.length < 3) {
         let hours = "00";
@@ -135,13 +132,13 @@ changePostTime.on("message", async (ctx) => {
 
         if (Number(minutes) > 59) {
           return await ctx.reply(
-              "Вы можете указать минуты только до 60 мин. Пришлите мне новое время жизни поста!"
+            "Вы можете указать минуты только до 60 мин. Пришлите мне новое время жизни поста!"
           );
         }
 
         if (Number(hours) < 1) {
           return await ctx.reply(
-              "Минимальное евремя жизни поста - 1 час. Пришлите мне новое время жизни поста!"
+            "Минимальное евремя жизни поста - 1 час. Пришлите мне новое время жизни поста!"
           );
         }
         time = hours + ":" + String(Number(minutes));
@@ -155,10 +152,10 @@ changePostTime.on("message", async (ctx) => {
       });
 
       if (channel) {
-          channel.timeOfActivePost = time;
-          await channel.save();
+        channel.timeOfActivePost = time;
+        await channel.save();
 
-          await ctx.scene.enter("changePostTime");
+        await ctx.scene.enter("changePostTime");
       }
     } else {
       return await ctx.reply("Неправильный формат вода!");
@@ -173,11 +170,11 @@ changePostTime.on("callback_query", async (ctx) => {
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "back") {
-        const channel = await Channel.findOne({telegramId: data.id});
-        channel.changeCompleted = true;
-        await channel.save();
+      const channel = await Channel.findOne({ telegramId: data.id });
+      channel.changeCompleted = true;
+      await channel.save();
 
-        await ctx.scene.enter("channelSettings");
+      await ctx.scene.enter("channelSettings");
     }
   } catch (e) {
     console.log(e.message);

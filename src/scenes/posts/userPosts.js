@@ -1,7 +1,8 @@
-const {Extra} = require("telegraf");
+const { Extra } = require("telegraf");
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
 const Post = require("../../models/Post");
+
 const userPosts = new Scene("userPosts");
 
 userPosts.enter(async (ctx) => {
@@ -11,64 +12,64 @@ userPosts.enter(async (ctx) => {
 
     if (!keyboard) {
       keyboard = {
-          text:
-              "Пока у вас 0 постов. Все ваши посты будут отображатся в этом меню",
-          markup: Extra.markdown().markup((m) =>
-              m.inlineKeyboard([
-                  [
-                      Markup.callbackButton("Add post", "addPost"),
-                      Markup.callbackButton("Back", "back"),
-                  ],
-              ])
-          ),
+        text:
+          "Пока у вас 0 постов. Все ваши посты будут отображатся в этом меню",
+        markup: Extra.markdown().markup((m) =>
+          m.inlineKeyboard([
+            [
+              Markup.callbackButton("Add post", "addPost"),
+              Markup.callbackButton("Back", "back"),
+            ],
+          ])
+        ),
       };
     }
 
-      if (
-          ctx.update.callback_query &&
-          (ctx.update.callback_query.data === "confirm" ||
-              ctx.update.callback_query.data === "back" ||
-              ctx.update.callback_query.data.indexOf("delete") !== -1)
-      ) {
-          await ctx.reply(keyboard.text, keyboard.markup);
-      } else {
-          await ctx.editMessageText(keyboard.text, keyboard.markup);
-      }
+    if (
+      ctx.update.callback_query &&
+      (ctx.update.callback_query.data === "confirm" ||
+        ctx.update.callback_query.data === "back" ||
+        ctx.update.callback_query.data.indexOf("delete") !== -1)
+    ) {
+      await ctx.reply(keyboard.text, keyboard.markup);
+    } else {
+      await ctx.editMessageText(keyboard.text, keyboard.markup);
+    }
   } catch (e) {
     console.log(e.message);
   }
 });
 
 userPosts.start(async (ctx) => {
-    try {
-        await ctx.scene.enter("main");
-    } catch (e) {
-        console.log(e.message);
-    }
+  try {
+    await ctx.scene.enter("main");
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 userPosts.on("message", async (ctx) => {
-    try {
-        await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id);
-    } catch (e) {
-        console.log(e.message);
-    }
+  try {
+    await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id);
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 userPosts.action("back", async (ctx) => {
-    try {
-        await ctx.scene.enter("main", ctx.state);
-    } catch (e) {
-        console.log(e.message);
-    }
+  try {
+    await ctx.scene.enter("main", ctx.state);
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 userPosts.action("addPost", async (ctx) => {
-    try {
-        await ctx.scene.enter("addName");
-    } catch (e) {
-        console.log(e.message);
-    }
+  try {
+    await ctx.scene.enter("addName");
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 userPosts.on("callback_query", async (ctx) => {
@@ -81,8 +82,8 @@ userPosts.on("callback_query", async (ctx) => {
       await ctx.scene.enter("viewPost");
     } else if (data.action === "next") {
       const keyboard = await getPosts(
-          ctx.update.callback_query.message.chat.id,
-          data.skip + data.limit
+        ctx.update.callback_query.message.chat.id,
+        data.skip + data.limit
       );
 
       if (keyboard) {
@@ -90,8 +91,8 @@ userPosts.on("callback_query", async (ctx) => {
       }
     } else if (data.action === "previous" && data.skip > 0) {
       const keyboard = await getPosts(
-          ctx.update.callback_query.message.chat.id,
-          data.skip - data.limit
+        ctx.update.callback_query.message.chat.id,
+        data.skip - data.limit
       );
 
       await ctx.editMessageText(keyboard.text, keyboard.markup);
@@ -103,25 +104,25 @@ userPosts.on("callback_query", async (ctx) => {
 
 const getPosts = async (userId, skip = 0, limit = 5) => {
   try {
-      let posts = await Post.find({
-          userId: userId,
-          completed: true,
-      })
-          .skip(skip)
-          .limit(limit);
+    let posts = await Post.find({
+      userId: userId,
+      completed: true,
+    })
+      .skip(skip)
+      .limit(limit);
 
-      if (posts.length === 0) {
-          return null;
-      }
+    if (posts.length === 0) {
+      return null;
+    }
 
-      posts = posts.map((x) => [
-          Markup.callbackButton(
-              x.name,
-              JSON.stringify({
-                  action: "getPost",
-                  id: x.telegramId,
-                  userId: x.userId,
-              })
+    posts = posts.map((x) => [
+      Markup.callbackButton(
+        x.name,
+        JSON.stringify({
+          action: "getPost",
+          id: x.telegramId,
+          userId: x.userId,
+        })
       ),
     ]);
 
@@ -133,20 +134,20 @@ const getPosts = async (userId, skip = 0, limit = 5) => {
       ...posts,
       [
         Markup.callbackButton(
-            "Previous",
-            JSON.stringify({
-                action: "previous",
-                limit: limit,
-                skip: skip,
-            })
+          "Previous",
+          JSON.stringify({
+            action: "previous",
+            limit: limit,
+            skip: skip,
+          })
         ),
         Markup.callbackButton(
-            "Next",
-            JSON.stringify({
-                action: "next",
-                limit: limit,
-                skip: skip,
-            })
+          "Next",
+          JSON.stringify({
+            action: "next",
+            limit: limit,
+            skip: skip,
+          })
         ),
       ],
     ];

@@ -1,7 +1,8 @@
-const {Extra} = require("telegraf");
+const { Extra } = require("telegraf");
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
 const Channel = require("../../models/Channel");
+
 const userChannels = new Scene("userChannels");
 
 userChannels.enter(async (ctx) => {
@@ -9,8 +10,8 @@ userChannels.enter(async (ctx) => {
     let keyboard;
     if (ctx.update.callback_query) {
       keyboard = await getChannels(
-          ctx,
-          ctx.update.callback_query.message.chat.id
+        ctx,
+        ctx.update.callback_query.message.chat.id
       );
     } else {
       keyboard = await getChannels(ctx, ctx.update.message.chat.id);
@@ -19,23 +20,23 @@ userChannels.enter(async (ctx) => {
     if (!keyboard) {
       keyboard = {
         text:
-            "Пока у вас 0 каналов. Все ваши каналы будут отображатся в этом меню",
+          "Пока у вас 0 каналов. Все ваши каналы будут отображатся в этом меню",
         markup: Extra.markdown().markup((m) =>
-            m.inlineKeyboard([
-              [
-                Markup.callbackButton("Add channel", "addChannel"),
-                Markup.callbackButton("Back", "back"),
-              ],
-            ])
+          m.inlineKeyboard([
+            [
+              Markup.callbackButton("Add channel", "addChannel"),
+              Markup.callbackButton("Back", "back"),
+            ],
+          ])
         ),
       };
     }
 
     if (
-        ctx.update.callback_query &&
-        (ctx.update.callback_query.data === "userChannels" ||
-            ctx.update.callback_query.data === "back" ||
-            JSON.parse(ctx.update.callback_query.data).action === "finish")
+      ctx.update.callback_query &&
+      (ctx.update.callback_query.data === "userChannels" ||
+        ctx.update.callback_query.data === "back" ||
+        JSON.parse(ctx.update.callback_query.data).action === "finish")
     ) {
       await ctx.answerCbQuery();
       await ctx.editMessageText(keyboard.text, keyboard.markup);
@@ -88,9 +89,9 @@ userChannels.on("callback_query", async (ctx) => {
       await ctx.scene.enter("viewChannel");
     } else if (data.action === "next") {
       const keyboard = await getChannels(
-          ctx,
-          ctx.update.callback_query.message.chat.id,
-          data.skip + data.limit
+        ctx,
+        ctx.update.callback_query.message.chat.id,
+        data.skip + data.limit
       );
 
       if (keyboard) {
@@ -98,9 +99,9 @@ userChannels.on("callback_query", async (ctx) => {
       }
     } else if (data.action === "previous" && data.skip > 0) {
       const keyboard = await getChannels(
-          ctx,
-          ctx.update.callback_query.message.chat.id,
-          data.skip - data.limit
+        ctx,
+        ctx.update.callback_query.message.chat.id,
+        data.skip - data.limit
       );
 
       await ctx.editMessageText(keyboard.text, keyboard.markup);
@@ -116,8 +117,8 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
       userId: userId,
       additionCompleted: true,
     })
-        .skip(skip)
-        .limit(limit);
+      .skip(skip)
+      .limit(limit);
 
     if (channels.length === 0) {
       return null;
@@ -131,11 +132,11 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
     channels = channels.map((x) => {
       return [
         Markup.callbackButton(
-            x.channelName,
-            JSON.stringify({
-              action: "getChannel",
-              id: x.telegramId,
-            })
+          x.channelName,
+          JSON.stringify({
+            action: "getChannel",
+            id: x.telegramId,
+          })
         ),
       ];
     });
@@ -148,20 +149,20 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
       ...channels,
       [
         Markup.callbackButton(
-            "Previous",
-            JSON.stringify({
-              action: "previous",
-              limit: limit,
-              skip: skip,
-            })
+          "Previous",
+          JSON.stringify({
+            action: "previous",
+            limit: limit,
+            skip: skip,
+          })
         ),
         Markup.callbackButton(
-            "Next",
-            JSON.stringify({
-              action: "next",
-              limit: limit,
-              skip: skip,
-            })
+          "Next",
+          JSON.stringify({
+            action: "next",
+            limit: limit,
+            skip: skip,
+          })
         ),
       ],
     ];

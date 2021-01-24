@@ -1,7 +1,8 @@
-const {Extra} = require("telegraf");
+const { Extra } = require("telegraf");
 const Scene = require("telegraf/scenes/base");
-const changePrice = new Scene("changePrice");
 const Channel = require("../../../models/Channel");
+
+const changePrice = new Scene("changePrice");
 
 changePrice.enter(async (ctx) => {
   try {
@@ -13,7 +14,7 @@ changePrice.enter(async (ctx) => {
     }
 
     if (data) {
-      channel = await Channel.findOne({telegramId: data.id});
+      channel = await Channel.findOne({ telegramId: data.id });
       channel.changeCompleted = false;
       await channel.save();
     } else {
@@ -37,38 +38,38 @@ changePrice.enter(async (ctx) => {
 
       if (data.action === "reply") {
         await ctx.reply(
-            `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
-            Extra.HTML().markup((m) =>
-                m.inlineKeyboard([
-                  [
-                    m.callbackButton(
-                        "Back",
-                        JSON.stringify({
-                          action: "back",
-                          id: data.id,
-                        })
-                    ),
-                  ],
-                ])
-            )
+          `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
+          Extra.HTML().markup((m) =>
+            m.inlineKeyboard([
+              [
+                m.callbackButton(
+                  "Back",
+                  JSON.stringify({
+                    action: "back",
+                    id: data.id,
+                  })
+                ),
+              ],
+            ])
+          )
         );
       } else {
         await ctx.answerCbQuery();
         await ctx.editMessageText(
-            `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
-            Extra.HTML().markup((m) =>
-                m.inlineKeyboard([
-                  [
-                    m.callbackButton(
-                        "Back",
-                        JSON.stringify({
-                          action: "back",
-                          id: data.id,
-                        })
-                    ),
-                  ],
-                ])
-            )
+          `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
+          Extra.HTML().markup((m) =>
+            m.inlineKeyboard([
+              [
+                m.callbackButton(
+                  "Back",
+                  JSON.stringify({
+                    action: "back",
+                    id: data.id,
+                  })
+                ),
+              ],
+            ])
+          )
         );
       }
     } else {
@@ -80,7 +81,6 @@ changePrice.enter(async (ctx) => {
 });
 
 changePrice.start(async (ctx) => {
-
   try {
     let channel = await Channel.findOne({
       userId: ctx.update.message.from.id,
@@ -128,7 +128,7 @@ changePrice.on("callback_query", async (ctx) => {
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "back") {
-      const channel = await Channel.findOne({telegramId: data.id});
+      const channel = await Channel.findOne({ telegramId: data.id });
       channel.changeCompleted = true;
       await channel.save();
 

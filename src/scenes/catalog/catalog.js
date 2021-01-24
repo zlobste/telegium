@@ -1,84 +1,87 @@
-const {Extra} = require("telegraf");
+const { Extra } = require("telegraf");
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
 const Channel = require("../../models/Channel");
 const Filter = require("../../models/Filter");
+
 const catalog = new Scene("catalog");
 
 catalog.enter(async (ctx) => {
   try {
     await ctx.answerCbQuery();
-    let keyboard = await getChannels(ctx, ctx.update.callback_query.message.chat.id);
+    let keyboard = await getChannels(
+      ctx,
+      ctx.update.callback_query.message.chat.id
+    );
 
     if (!keyboard) {
       keyboard = {
         text: "По вашему фильтру не найдено ни одного канала!",
         markup: Extra.markdown().markup((m) =>
-            m.inlineKeyboard([
-              [
-                Markup.callbackButton("Category", "category"),
-                Markup.callbackButton("Interval", "interval"),
-                Markup.callbackButton("Sort", "sort"),
-              ],
-              [Markup.callbackButton("Back", "back")],
-            ])
+          m.inlineKeyboard([
+            [
+              Markup.callbackButton("Category", "category"),
+              Markup.callbackButton("Interval", "interval"),
+              Markup.callbackButton("Sort", "sort"),
+            ],
+            [Markup.callbackButton("Back", "back")],
+          ])
         ),
       };
     }
 
     await ctx.editMessageText(keyboard.text, keyboard.markup);
-
   } catch (e) {
     console.log(e.message);
   }
 });
 
 catalog.start(async (ctx) => {
-    try {
-        await ctx.scene.enter("main");
-    } catch (e) {
-        console.log(e.message);
-    }
+  try {
+    await ctx.scene.enter("main");
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 catalog.on("message", async (ctx) => {
-    try {
-        await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id);
-    } catch (e) {
-        console.log(e.message);
-    }
+  try {
+    await ctx.tg.deleteMessage(ctx.chat.id, ctx.update.message.message_id);
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 catalog.action("back", async (ctx) => {
-    try {
-        await ctx.scene.enter("main", ctx.state);
-    } catch (e) {
-        console.log(e.message);
-    }
+  try {
+    await ctx.scene.enter("main", ctx.state);
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 catalog.action("sort", async (ctx) => {
-    try {
-        await ctx.scene.enter("changeCatalogSort");
-    } catch (e) {
-        console.log(e.message);
-    }
+  try {
+    await ctx.scene.enter("changeCatalogSort");
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 catalog.action("interval", async (ctx) => {
-    try {
-        await ctx.scene.enter("changeCatalogInterval");
-    } catch (e) {
-        console.log(e.message);
-    }
+  try {
+    await ctx.scene.enter("changeCatalogInterval");
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 catalog.action("category", async (ctx) => {
-    try {
-        await ctx.scene.enter("changeCatalogCategory");
-    } catch (e) {
-        console.log(e.message);
-    }
+  try {
+    await ctx.scene.enter("changeCatalogCategory");
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 catalog.on("callback_query", async (ctx) => {
@@ -88,22 +91,22 @@ catalog.on("callback_query", async (ctx) => {
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "getChannelForOrder") {
-        await ctx.scene.enter("viewChannel");
+      await ctx.scene.enter("viewChannel");
     } else if (data.action === "next") {
-        const keyboard = await getChannels(
-            ctx,
-            ctx.update.callback_query.message.chat.id,
-            data.skip + data.limit
-        );
+      const keyboard = await getChannels(
+        ctx,
+        ctx.update.callback_query.message.chat.id,
+        data.skip + data.limit
+      );
 
-        if (keyboard) {
-            await ctx.editMessageText(keyboard.text, keyboard.markup);
+      if (keyboard) {
+        await ctx.editMessageText(keyboard.text, keyboard.markup);
       }
     } else if (data.action === "previous" && data.skip > 0) {
       const keyboard = await getChannels(
-          ctx,
-          ctx.update.callback_query.message.chat.id,
-          data.skip - data.limit
+        ctx,
+        ctx.update.callback_query.message.chat.id,
+        data.skip - data.limit
       );
 
       await ctx.editMessageText(keyboard.text, keyboard.markup);
@@ -138,16 +141,20 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
 
     channels = channels.filter((x) => {
       if (filter.categories.length === 0) {
-          return x.price >= filter.interval.cost.start &&
-              x.price <= filter.interval.cost.finish &&
-              x.countOfMembers >= filter.interval.members.start &&
-              x.countOfMembers <= filter.interval.members.finish;
+        return (
+          x.price >= filter.interval.cost.start &&
+          x.price <= filter.interval.cost.finish &&
+          x.countOfMembers >= filter.interval.members.start &&
+          x.countOfMembers <= filter.interval.members.finish
+        );
       } else {
-          return filter.categories.indexOf(x.category) !== -1 &&
-              x.price >= filter.interval.cost.start &&
-              x.price <= filter.interval.cost.finish &&
-              x.countOfMembers >= filter.interval.members.start &&
-              x.countOfMembers <= filter.interval.members.finish;
+        return (
+          filter.categories.indexOf(x.category) !== -1 &&
+          x.price >= filter.interval.cost.start &&
+          x.price <= filter.interval.cost.finish &&
+          x.countOfMembers >= filter.interval.members.start &&
+          x.countOfMembers <= filter.interval.members.finish
+        );
       }
     });
 
@@ -197,11 +204,11 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
     channels = channels.map((x) => {
       return [
         Markup.callbackButton(
-            x.channelName,
-            JSON.stringify({
-                action: "getChannelForOrder",
-                id: x.telegramId,
-            })
+          x.channelName,
+          JSON.stringify({
+            action: "getChannelForOrder",
+            id: x.telegramId,
+          })
         ),
       ];
     });
@@ -215,20 +222,20 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
       ...channels,
       [
         Markup.callbackButton(
-            "Previous",
-            JSON.stringify({
-              action: "previous",
-              limit: limit,
-              skip: skip,
-            })
+          "Previous",
+          JSON.stringify({
+            action: "previous",
+            limit: limit,
+            skip: skip,
+          })
         ),
         Markup.callbackButton(
-            "Next",
-            JSON.stringify({
-              action: "next",
-              limit: limit,
-              skip: skip,
-            })
+          "Next",
+          JSON.stringify({
+            action: "next",
+            limit: limit,
+            skip: skip,
+          })
         ),
       ],
       [Markup.callbackButton("Back", "back")],
@@ -237,7 +244,6 @@ const getChannels = async (ctx, userId, skip = 0, limit = 5) => {
     let filterCategories = "Bсе";
     if (filter.categories.length > 0) {
       filterCategories = filter.categories.join(", ");
-
     }
 
     let sorting = "";

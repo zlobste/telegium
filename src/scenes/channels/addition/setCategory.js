@@ -1,9 +1,10 @@
 const Scene = require("telegraf/scenes/base");
-const setCategory = new Scene("setCategory");
 const Category = require("../../../models/Category");
 const Channel = require("../../../models/Channel");
 const Markup = require("telegraf/markup");
-const {Extra} = require("telegraf");
+const { Extra } = require("telegraf");
+
+const setCategory = new Scene("setCategory");
 
 setCategory.enter(async (ctx) => {
   try {
@@ -11,11 +12,11 @@ setCategory.enter(async (ctx) => {
       userId: ctx.update.message.chat.id,
       additionCompleted: false,
     })
-        .sort({_id: -1})
-        .limit(1);
+      .sort({ _id: -1 })
+      .limit(1);
 
     if (channel) {
-      const data = {id: channel.telegramId};
+      const data = { id: channel.telegramId };
 
       const categories = await getCategories(data.id);
       if (categories) {
@@ -37,15 +38,14 @@ setCategory.on("callback_query", async (ctx) => {
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "nextStep") {
-      const channel = await Channel.findOne({telegramId: data.id});
-
+      const channel = await Channel.findOne({ telegramId: data.id });
       if (channel) {
         if (!channel.category) {
           await ctx.reply("Вы не выбрали категорию Вашего канала!");
         } else {
           await ctx.scene
-              .enter("setPrice")
-              .catch((e) => console.log(e.message));
+            .enter("setPrice")
+            .catch((e) => console.log(e.message));
         }
       }
     } else if (data.action === "next") {
@@ -60,7 +60,7 @@ setCategory.on("callback_query", async (ctx) => {
       await ctx.editMessageText(keyboard.text, keyboard.markup);
     } else {
       if (data.n) {
-        const channel = await Channel.findOne({telegramId: data.id});
+        const channel = await Channel.findOne({ telegramId: data.id });
         channel.category = data.n;
         await channel.save();
 
@@ -86,28 +86,28 @@ const getCategories = async (id, skip = 0, limit = 5) => {
 
     categories = categories.map((x) => [
       Markup.callbackButton(
-          x.name,
-          JSON.stringify({
-            n: x.name,
-            id: id,
-            l: limit,
-            s: skip,
-          })
+        x.name,
+        JSON.stringify({
+          n: x.name,
+          id: id,
+          l: limit,
+          s: skip,
+        })
       ),
     ]);
 
-    const channel = await Channel.findOne({telegramId: id});
+    const channel = await Channel.findOne({ telegramId: id });
     let additionButton = [];
 
     if (channel.category) {
       additionButton = [
         [
           Markup.callbackButton(
-              "Next step",
-              JSON.stringify({
-                action: "nextStep",
-                id: id,
-              })
+            "Next step",
+            JSON.stringify({
+              action: "nextStep",
+              id: id,
+            })
           ),
         ],
       ];
@@ -117,22 +117,22 @@ const getCategories = async (id, skip = 0, limit = 5) => {
       ...categories,
       [
         Markup.callbackButton(
-            "Previous",
-            JSON.stringify({
-              action: "previous",
-              limit: limit,
-              skip: skip,
-              id: id,
-            })
+          "Previous",
+          JSON.stringify({
+            action: "previous",
+            limit: limit,
+            skip: skip,
+            id: id,
+          })
         ),
         Markup.callbackButton(
-            "Next",
-            JSON.stringify({
-              action: "next",
-              limit: limit,
-              skip: skip,
-              id: id,
-            })
+          "Next",
+          JSON.stringify({
+            action: "next",
+            limit: limit,
+            skip: skip,
+            id: id,
+          })
         ),
       ],
       ...additionButton,

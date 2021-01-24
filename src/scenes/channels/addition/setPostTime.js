@@ -1,7 +1,8 @@
-const {Extra} = require("telegraf");
+const { Extra } = require("telegraf");
 const Scene = require("telegraf/scenes/base");
-const setPostTime = new Scene("setPostTime");
 const Channel = require("../../../models/Channel");
+
+const setPostTime = new Scene("setPostTime");
 
 setPostTime.enter(async (ctx) => {
   try {
@@ -36,29 +37,29 @@ setPostTime.enter(async (ctx) => {
 
       if (data.action === "reply") {
         await ctx.reply(
-            `Канал: ${chatInfo.title}\nТекущее время жизни поста: ${
-                channel.timeOfActivePost.split(":")[0]
-            } часов ${
-                channel.timeOfActivePost.split(":")[1]
-            } минут\n\nПришлите новое время жизни рекламного поста на Вашем канале\nФормат: 3 (3 часа) или 3:30 (3 часа 30 минут)\n\nP.S. Минимальное евремя жизни поста - 1 час`,
-            Extra.HTML().markup((m) =>
-                m.inlineKeyboard([
-                  [
-                    m.callbackButton(
-                        "Finish",
-                        JSON.stringify({
-                          action: "finish",
-                          id: channel.telegramId,
-                        })
-                    ),
-                  ],
-                ])
-            )
+          `Канал: ${chatInfo.title}\nТекущее время жизни поста: ${
+            channel.timeOfActivePost.split(":")[0]
+          } часов ${
+            channel.timeOfActivePost.split(":")[1]
+          } минут\n\nПришлите новое время жизни рекламного поста на Вашем канале\nФормат: 3 (3 часа) или 3:30 (3 часа 30 минут)\n\nP.S. Минимальное евремя жизни поста - 1 час`,
+          Extra.HTML().markup((m) =>
+            m.inlineKeyboard([
+              [
+                m.callbackButton(
+                  "Finish",
+                  JSON.stringify({
+                    action: "finish",
+                    id: channel.telegramId,
+                  })
+                ),
+              ],
+            ])
+          )
         );
       } else {
         await ctx.answerCbQuery();
         await ctx.editMessageText(
-            `Канал: ${chatInfo.title}\n\nПришлите время жизни рекламного поста на Вашем канале\nФормат: 3 (3 часа) или 3:30 (3 часа 30 минут)\n\nP.S. Минимальное евремя жизни поста - 1 час`
+          `Канал: ${chatInfo.title}\n\nПришлите время жизни рекламного поста на Вашем канале\nФормат: 3 (3 часа) или 3:30 (3 часа 30 минут)\n\nP.S. Минимальное евремя жизни поста - 1 час`
         );
       }
     } else {
@@ -95,13 +96,13 @@ setPostTime.on("message", async (ctx) => {
 
         if (Number(minutes) > 59) {
           return await ctx.reply(
-              "Вы можете указать минуты только до 60 мин. Пришлите мне новое время жизни поста!"
+            "Вы можете указать минуты только до 60 мин. Пришлите мне новое время жизни поста!"
           );
         }
 
         if (Number(hours) < 1) {
           return await ctx.reply(
-              "Минимальное евремя жизни поста - 1 час. Пришлите мне новое время жизни поста!"
+            "Минимальное евремя жизни поста - 1 час. Пришлите мне новое время жизни поста!"
           );
         }
         time = hours + ":" + String(Number(minutes));
@@ -115,10 +116,10 @@ setPostTime.on("message", async (ctx) => {
       });
 
       if (channel) {
-          channel.timeOfActivePost = time;
-          await channel.save();
+        channel.timeOfActivePost = time;
+        await channel.save();
 
-          await ctx.scene.enter("setPostTime");
+        await ctx.scene.enter("setPostTime");
       }
     } else {
       return await ctx.reply("Неправильный формат вода!");
@@ -133,17 +134,17 @@ setPostTime.on("callback_query", async (ctx) => {
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "finish") {
-        const channel = await Channel.findOne({telegramId: data.id});
-        channel.additionCompleted = true;
-        await channel.save();
+      const channel = await Channel.findOne({ telegramId: data.id });
+      channel.additionCompleted = true;
+      await channel.save();
 
-        await ctx.answerCbQuery();
+      await ctx.answerCbQuery();
 
-        try {
-            await ctx.scene.enter("userChannels");
-        } catch (e) {
-            console.log(e.message);
-        }
+      try {
+        await ctx.scene.enter("userChannels");
+      } catch (e) {
+        console.log(e.message);
+      }
     }
   } catch (e) {
     console.log(e.message);

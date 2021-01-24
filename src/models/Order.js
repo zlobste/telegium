@@ -1,4 +1,4 @@
-const {Schema, model} = require("mongoose");
+const { Schema, model } = require("mongoose");
 
 const schema = new Schema({
   channelId: {
@@ -28,7 +28,7 @@ const schema = new Schema({
   completed: {
     type: Boolean,
     default: false,
-  }
+  },
 });
 
 module.exports = model("Order", schema);

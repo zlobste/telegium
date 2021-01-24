@@ -1,7 +1,8 @@
-const {Extra} = require("telegraf");
+const { Extra } = require("telegraf");
 const Scene = require("telegraf/scenes/base");
-const setPrice = new Scene("setPrice");
 const Channel = require("../../../models/Channel");
+
+const setPrice = new Scene("setPrice");
 
 setPrice.enter(async (ctx) => {
   try {
@@ -33,23 +34,23 @@ setPrice.enter(async (ctx) => {
       if (data.action === "reply") {
         if (channel.price) {
           await ctx.reply(
-              `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
-              Extra.HTML().markup((m) =>
-                  m.inlineKeyboard([
-                    [
-                      m.callbackButton(
-                          "Next step",
-                          JSON.stringify({
-                            action: "nextStep",
-                          })
-                      ),
-                    ],
-                  ])
-              )
+            `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
+            Extra.HTML().markup((m) =>
+              m.inlineKeyboard([
+                [
+                  m.callbackButton(
+                    "Next step",
+                    JSON.stringify({
+                      action: "nextStep",
+                    })
+                  ),
+                ],
+              ])
+            )
           );
         } else {
           await ctx.reply(
-              `Канал: ${chatInfo.title}\n\nПришлите цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`
+            `Канал: ${chatInfo.title}\n\nПришлите цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`
           );
         }
       } else {
@@ -57,23 +58,23 @@ setPrice.enter(async (ctx) => {
 
         if (channel.price) {
           await ctx.editMessageText(
-              `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
-              Extra.HTML().markup((m) =>
-                  m.inlineKeyboard([
-                    [
-                      m.callbackButton(
-                          "Next step",
-                          JSON.stringify({
-                            action: "nextStep",
-                          })
-                      ),
-                    ],
-                  ])
-              )
+            `Канал: ${chatInfo.title}\nТеущая стоимость поста: ${channel.price} ₽\n\nПришлите новую цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`,
+            Extra.HTML().markup((m) =>
+              m.inlineKeyboard([
+                [
+                  m.callbackButton(
+                    "Next step",
+                    JSON.stringify({
+                      action: "nextStep",
+                    })
+                  ),
+                ],
+              ])
+            )
           );
         } else {
           await ctx.editMessageText(
-              `Канал: ${chatInfo.title}\n\nПришлите цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`
+            `Канал: ${chatInfo.title}\n\nПришлите цену за размещение рекламного поста на Вашем канале\nФормат: 49.99 или 49`
           );
         }
       }
@@ -90,7 +91,6 @@ setPrice.on("message", async (ctx) => {
     let price = Number(ctx.update.message.text);
 
     if (price) {
-
       price = Number(price.toFixed(2));
       let channel = await Channel.findOne({
         userId: ctx.update.message.chat.id,
@@ -98,15 +98,14 @@ setPrice.on("message", async (ctx) => {
       });
 
       if (channel) {
-          channel.price = price;
-          await channel.save();
+        channel.price = price;
+        await channel.save();
 
-          try {
-              await ctx.scene.enter("setPrice");
-          } catch (e) {
-              console.log(e.message);
-          }
-
+        try {
+          await ctx.scene.enter("setPrice");
+        } catch (e) {
+          console.log(e.message);
+        }
       }
     } else {
       return await ctx.reply("Неправильный формат вода!");
@@ -121,7 +120,7 @@ setPrice.on("callback_query", async (ctx) => {
     const data = JSON.parse(ctx.update.callback_query.data);
 
     if (data.action === "nextStep") {
-        await ctx.scene.enter("setPrice");
+      await ctx.scene.enter("setPrice");
     }
   } catch (e) {
     console.log(e.message);

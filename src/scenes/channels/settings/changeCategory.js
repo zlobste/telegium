@@ -1,9 +1,10 @@
 const Scene = require("telegraf/scenes/base");
-const changeCategory = new Scene("changeCategory");
 const Category = require("../../../models/Category");
 const Channel = require("../../../models/Channel");
 const Markup = require("telegraf/markup");
-const {Extra} = require("telegraf");
+const { Extra } = require("telegraf");
+
+const changeCategory = new Scene("changeCategory");
 
 changeCategory.enter(async (ctx) => {
   try {
@@ -41,7 +42,7 @@ changeCategory.on("callback_query", async (ctx) => {
       await ctx.editMessageText(keyboard.text, keyboard.markup);
     } else {
       if (data.n) {
-        const channel = await Channel.findOne({telegramId: data.id});
+        const channel = await Channel.findOne({ telegramId: data.id });
         channel.category = data.n;
         await channel.save();
 
@@ -67,13 +68,13 @@ const getCategories = async (id, skip = 0, limit = 5) => {
 
     categories = categories.map((x) => [
       Markup.callbackButton(
-          x.name,
-          JSON.stringify({
-            n: x.name,
-            id: id,
-            l: limit,
-            s: skip,
-          })
+        x.name,
+        JSON.stringify({
+          n: x.name,
+          id: id,
+          l: limit,
+          s: skip,
+        })
       ),
     ]);
 
@@ -81,36 +82,36 @@ const getCategories = async (id, skip = 0, limit = 5) => {
       ...categories,
       [
         Markup.callbackButton(
-            "Previous",
-            JSON.stringify({
-              action: "previous",
-              limit: limit,
-              skip: skip,
-              id: id,
-            })
+          "Previous",
+          JSON.stringify({
+            action: "previous",
+            limit: limit,
+            skip: skip,
+            id: id,
+          })
         ),
         Markup.callbackButton(
-            "Next",
-            JSON.stringify({
-              action: "next",
-              limit: limit,
-              skip: skip,
-              id: id,
-            })
+          "Next",
+          JSON.stringify({
+            action: "next",
+            limit: limit,
+            skip: skip,
+            id: id,
+          })
         ),
       ],
       [
         Markup.callbackButton(
-            "Back",
-            JSON.stringify({
-              action: "back",
-              id: id,
-            })
+          "Back",
+          JSON.stringify({
+            action: "back",
+            id: id,
+          })
         ),
       ],
     ];
 
-    const channel = await Channel.findOne({telegramId: id});
+    const channel = await Channel.findOne({ telegramId: id });
 
     if (channel) {
       return {
