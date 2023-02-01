@@ -13,7 +13,7 @@
   "dependencies": {
     "@mtproto/core": "^3.2.0",
     "dotenv": "^8.2.0",
-    "mongoose": "^5.9.18",
+    "mongoose": "^5.13.15",
     "mtproto-storage-fs": "^0.3.1",
     "prompt": "^1.0.0",
     "telegraf": "^3.38.0"
